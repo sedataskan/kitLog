@@ -31,7 +31,7 @@ export default function Navbar() {
             : { display: "none" },
 
           tabBarShowLabel: false,
-          tabBarActiveTintColor: "#000",
+          tabBarActiveTintColor: "#4B6E7C",
         };
       }}
     >

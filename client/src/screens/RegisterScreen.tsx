@@ -1,18 +1,57 @@
-import { View, StyleSheet, Text } from "react-native";
-import { Layout } from "../layout/layout";
+import { View, StyleSheet, Text, Button, TouchableOpacity } from "react-native";
+import InputBox from "../components/inputBox";
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import { Image } from "react-native";
 
 export default function RegisterScreen() {
+  const navigation = useNavigation();
+
   return (
-    <Layout title={"Register"}>
-      <View style={styles.container}>
-        <Text>Register Screens</Text>
+    <View style={styles.container}>
+      <Image
+        source={require("../../assets/images/KITAPP.png")}
+        style={styles.logo}
+      />
+      <InputBox placeholder="Username" secureTextEntry={false} />
+      <InputBox placeholder="Password" secureTextEntry={true} />
+      <View style={styles.button}>
+        <Button
+          color="#D4DCDF"
+          title="Register"
+          onPress={() => navigation.navigate("Main" as never)}
+        />
       </View>
-    </Layout>
+      <TouchableOpacity onPress={() => navigation.navigate("Login" as never)}>
+        <Text style={styles.registerText}>Have an account? Sign In!</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#4B6E7C",
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+  },
+  button: {
+    marginTop: 20,
+    width: 150,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#D4DCDF",
+    backgroundColor: "#4B6E7C",
+  },
+  registerText: {
+    color: "#D4DCDF",
+    marginTop: 20,
+    textDecorationLine: "underline",
   },
 });
