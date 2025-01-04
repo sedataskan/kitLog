@@ -28,6 +28,12 @@ export default function LoginScreen() {
         />
       </View>
       <TouchableOpacity
+        onPress={() => navigation.navigate("ForgotMyPassword" as never)}
+      >
+        <Text style={styles.forgotPasswordText}>Forgot Your Password?</Text>
+      </TouchableOpacity>
+      <Text style={styles.orText}>───── OR ─────</Text>
+      <TouchableOpacity
         onPress={() => navigation.navigate("Register" as never)}
       >
         <Text style={styles.registerText}>Register Now!</Text>
@@ -55,10 +61,21 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#D4DCDF",
     backgroundColor: "#4B6E7C",
+    marginBottom: 20,
+  },
+  forgotPasswordText: {
+    color: "#000",
+    marginTop: 20,
+    fontStyle: "italic",
   },
   registerText: {
-    color: "#D4DCDF",
+    color: "#000",
     marginTop: 20,
-    textDecorationLine: "underline",
+    fontStyle: "italic",
+  },
+  orText: {
+    color: "#000",
+    marginTop: 20,
+    textAlign: "center",
   },
 });

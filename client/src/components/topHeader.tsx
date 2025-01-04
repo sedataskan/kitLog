@@ -13,11 +13,12 @@ export const TopHeader = ({
   const route = useRoute();
 
   const isAddBookPage = route.name === "AddBook";
+  const isBookPreviewPage = route.name === "BookPreview";
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerContainer}>
-        {isAddBookPage && (
+        {(isAddBookPage || isBookPreviewPage) && (
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Text style={styles.backButton}>&larr;</Text>
           </TouchableOpacity>
@@ -25,7 +26,7 @@ export const TopHeader = ({
 
         <Text style={[styles.title]}>{title}</Text>
 
-        {!isAddBookPage && (
+        {!(isAddBookPage || isBookPreviewPage) && (
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile" as never)}
           >

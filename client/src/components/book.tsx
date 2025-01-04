@@ -1,19 +1,79 @@
 import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
-import { generateRandomBook } from "../utils/randomBookGenerator";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
-export const Book = ({ title, author }: { title: string; author: string }) => {
+type RootStackParamList = {
+  BookPreview: {
+    book: {
+      title: string;
+      author: string;
+      image: string;
+      pages: string;
+      publication: string;
+      review: string;
+      rating: number;
+      saveDate: Date;
+    };
+  };
+};
+
+type BookScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "BookPreview"
+>;
+
+export const Book = ({
+  title,
+  author,
+  image,
+  pages,
+  publication,
+  review,
+  rating,
+}: {
+  title: string;
+  author: string;
+  image: string;
+  pages: string;
+  publication: string;
+  review: string;
+  rating: number;
+}) => {
+  const navigation = useNavigation<BookScreenNavigationProp>();
+
+  const handlePress = () => {
+    navigation.navigate("BookPreview", {
+      book: {
+        title,
+        author,
+        image,
+        pages,
+        publication,
+        review,
+        rating,
+        saveDate: new Date(),
+      },
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={{ uri: generateRandomBook().coverImage }}
-          style={styles.image}
-        />
+    <TouchableOpacity onPress={handlePress}>
+      <View style={styles.container}>
+        <View style={styles.imageContainer}>
+          <Image
+            source={
+              image
+                ? { uri: image }
+                : require("../../assets/images/unknownBook.jpg")
+            }
+            style={styles.image}
+          />
+        </View>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.author}>{author}</Text>
       </View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.author}>{author}</Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 

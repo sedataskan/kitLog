@@ -1,17 +1,10 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 
-export default function AddButton() {
-  const navigation = useNavigation();
-
-  const handlePress = () => {
-    navigation.navigate("AddBook" as never);
-  };
-
+export default function AddButton({ onPress }: { onPress: () => void }) {
   return (
-    <TouchableOpacity style={styles.floatingButton} onPress={handlePress}>
+    <TouchableOpacity style={styles.floatingButton} onPress={onPress}>
       <Ionicons name="add-outline" size={24} color="#fff" />
     </TouchableOpacity>
   );
