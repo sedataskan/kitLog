@@ -1,11 +1,17 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
 
 export default function AddButton({ onPress }: { onPress: () => void }) {
   return (
     <TouchableOpacity style={styles.floatingButton} onPress={onPress}>
-      <Ionicons name="add-outline" size={24} color="#fff" />
+      <Ionicons
+        name="add-outline"
+        size={sizes.fontSizeLarge}
+        color={colors.background}
+      />
     </TouchableOpacity>
   );
 }
@@ -17,15 +23,11 @@ const styles = StyleSheet.create({
     right: 20,
     width: 50,
     height: 50,
-    borderRadius: 10,
-    backgroundColor: "#4B6E7C",
+    borderRadius: sizes.borderRadius,
+    backgroundColor: colors.primary,
     justifyContent: "center",
     alignItems: "center",
     elevation: 5,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
     zIndex: 1,
   },
 });

@@ -4,8 +4,11 @@ import { Book } from "../components/book";
 import SearchBox from "../components/searchBox";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import AddButton from "../components/addButton";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
+import { useCallback } from "react";
 
 export default function LibraryScreen() {
   const navigation = useNavigation();
@@ -37,6 +40,23 @@ export default function LibraryScreen() {
     fetchBooks();
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      const fetchBooks = async () => {
+        try {
+          const storedBooks = await AsyncStorage.getItem("books");
+          if (storedBooks) {
+            setBooks(JSON.parse(storedBooks));
+          }
+        } catch (error) {
+          console.error("Error fetching books from local storage", error);
+        }
+      };
+
+      fetchBooks();
+    }, [])
+  );
+
   const filteredBooks = searchQuery
     ? books.filter((book) =>
         book.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -61,6 +81,13 @@ export default function LibraryScreen() {
 
   return (
     <Layout title="Library">
+      <AddButton
+        onPress={() =>
+          navigation.navigate("AddBook", {
+            onBookAdded: handleBookAdded,
+          })
+        }
+      />
       <View style={styles.container}>
         <SearchBox
           placeholder="Search by title"
@@ -80,13 +107,6 @@ export default function LibraryScreen() {
             />
           ))}
         </ScrollView>
-        <AddButton
-          onPress={() =>
-            navigation.navigate("AddBook", {
-              onBookAdded: handleBookAdded,
-            })
-          }
-        />
       </View>
     </Layout>
   );
@@ -94,7 +114,8 @@ export default function LibraryScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
+    borderRadius: sizes.borderRadius,
   },
   contentContainer: {
     flexDirection: "row",

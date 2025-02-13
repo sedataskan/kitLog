@@ -2,6 +2,8 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
 
 type RootStackParamList = {
   BookPreview: {
@@ -81,13 +83,13 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     margin: 25,
-    borderRadius: 10,
+    borderRadius: sizes.borderRadius,
   },
   imageContainer: {
     width: 120,
     height: 180,
-    borderRadius: 10,
-    backgroundColor: "#D3D3D3",
+    borderRadius: sizes.borderRadius,
+    backgroundColor: colors.secondary,
     marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
@@ -95,19 +97,19 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    borderRadius: 10,
+    borderRadius: sizes.borderRadius,
   },
   title: {
-    fontSize: 16,
+    fontSize: sizes.fontSizeMedium,
     fontWeight: "bold",
-    color: "#000",
+    color: colors.textPrimary,
     textAlign: "center",
     overflow: "hidden",
     maxWidth: 110,
   },
   author: {
-    fontSize: 14,
-    color: "#6E6E6E",
+    fontSize: sizes.fontSizeSmall,
+    color: colors.textSecondary,
     textAlign: "center",
     overflow: "hidden",
     maxWidth: 110,
