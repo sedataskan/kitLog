@@ -1,19 +1,17 @@
-import { View, StyleSheet, Text, TouchableOpacity, Image } from "react-native";
-import { Layout } from "../layout/layout";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { View, StyleSheet, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
+import { useFocusEffect } from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Layout } from "../layout/layout";
 
-export default function ProfileScreen({
-  title,
-  avatarUrl,
-}: {
-  title: string;
-  avatarUrl: string;
-}) {
-  const navigation = useNavigation();
+export default function ProfileScreen() {
   const [totalBooks, setTotalBooks] = useState(0);
+  const [fontsLoaded] = useFonts({
+    DancingScript: require("..//..//assets/fonts/DancingScript-Regular.ttf"),
+  });
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -31,32 +29,43 @@ export default function ProfileScreen({
     fetchBooks();
   }, []);
 
-  const handlePress = () => {
-    navigation.navigate("Login" as never);
-  };
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchBooks = async () => {
+        try {
+          const storedBooks = await AsyncStorage.getItem("books");
+          if (storedBooks) {
+            const books = JSON.parse(storedBooks);
+            setTotalBooks(books.length);
+          }
+        } catch (error) {
+          console.error("Error fetching books from local storage", error);
+        }
+      };
+
+      fetchBooks();
+    }, [])
+  );
 
   const badges = [
-    { id: 1, name: "First Book Saved", icon: "📘" },
-    { id: 2, name: "First 10 Books Saved", icon: "📚" },
-    { id: 3, name: "First 100 Books Saved", icon: "🏆" },
-    { id: 4, name: "First Review Written", icon: "✍️" },
-    { id: 5, name: "First 10 Reviews Written", icon: "📝" },
-    { id: 6, name: "First 100 Reviews Written", icon: "📈" },
+    { id: 1, name: "First Book Saved", icon: "📘", requiredBooks: 1 },
+    { id: 2, name: "10 Books Saved", icon: "📚", requiredBooks: 10 },
+    { id: 3, name: "25 Books Saved", icon: "💪", requiredBooks: 25 },
+    { id: 4, name: "50 Books Saved", icon: "🏆", requiredBooks: 50 },
+    { id: 5, name: "100 Books Saved!", icon: "💯", requiredBooks: 100 },
   ];
 
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <>
+    <Layout title="">
       <View style={styles.container}>
-        <Image
-          source={{
-            uri: "https://a1cf74336522e87f135f-2f21ace9a6cf0052456644b80fa06d4f.ssl.cf2.rackcdn.com/images/characters/large/800/Bella-Swan.Twilight.webp",
-          }}
-          style={styles.profileImage}
-        />
-        <Text style={styles.name}>Schwi Dola</Text>
-        <Text style={styles.registrationDate}>
-          Registration Date: 01/01/2020
-        </Text>
+        <View style={styles.header}>
+          <Text style={styles.hello}>👋 Hello, </Text>
+          <Text style={styles.brand}>KitApper!</Text>
+        </View>
         <Text style={styles.totalBooks}></Text>
         <View style={styles.table}>
           <Text>Total Books Read: {totalBooks}</Text>
@@ -64,89 +73,68 @@ export default function ProfileScreen({
         <View style={styles.badgesContainer}>
           <Text style={styles.badgesTitle}>Achievements</Text>
           <View style={styles.badges}>
-            {badges.map((badge) => (
-              <View key={badge.id} style={styles.badge}>
-                <Text style={styles.badgeIcon}>{badge.icon}</Text>
-                <Text style={styles.badgeName}>{badge.name}</Text>
-              </View>
-            ))}
+            {badges
+              .filter((badge) => totalBooks >= badge.requiredBooks)
+              .map((badge) => (
+                <View key={badge.id} style={styles.badge}>
+                  <Text style={styles.badgeIcon}>{badge.icon}</Text>
+                  <Text style={styles.badgeName}>{badge.name}</Text>
+                </View>
+              ))}
           </View>
         </View>
       </View>
-      <TouchableOpacity style={styles.floatingButton} onPress={handlePress}>
-        <Ionicons name="log-out" size={24} color="#fff" />
-      </TouchableOpacity>
-    </>
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "flex-start",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.background,
     padding: 20,
+    justifyContent: "center",
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginTop: 50,
-    marginBottom: 10,
-    borderWidth: 5,
-    borderColor: "#4B6E7C",
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 5,
+  },
+  hello: {
+    fontSize: sizes.fontSizeLarge,
+    fontWeight: "bold",
+  },
+  brand: {
+    fontSize: sizes.fontSizeLarge,
+    fontWeight: "bold",
+    fontFamily: "DancingScript",
+    fontStyle: "italic",
+    color: colors.primary,
   },
   table: {
     width: "100%",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: colors.secondary,
     marginBottom: 20,
-    borderRadius: 10,
+    borderRadius: sizes.borderRadius,
     elevation: 2,
   },
   totalBooks: {
-    fontSize: 15,
-    color: "#666",
+    fontSize: sizes.fontSizeSmall,
+    color: colors.primary,
     marginBottom: 20,
-  },
-  registrationDate: {
-    fontSize: 15,
-    color: "#666",
-    marginBottom: 5,
-  },
-  floatingButton: {
-    position: "absolute",
-    top: 720,
-    right: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 10,
-    backgroundColor: "#4B6E7C",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
-    zIndex: 1,
   },
   badgesContainer: {
     width: "100%",
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: colors.backgroundSecondary,
     marginBottom: 20,
-    borderRadius: 10,
+    borderRadius: sizes.borderRadius,
     elevation: 2,
   },
   badgesTitle: {
-    fontSize: 18,
+    fontSize: sizes.fontSizeMedium,
     fontWeight: "bold",
     marginBottom: 10,
   },
@@ -160,10 +148,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   badgeIcon: {
-    fontSize: 30,
+    fontSize: sizes.fontSizeLarge,
   },
   badgeName: {
-    fontSize: 12,
+    fontSize: sizes.fontSizeSmall,
     textAlign: "center",
   },
 });

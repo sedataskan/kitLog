@@ -1,14 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
 
-export const TopHeader = ({
-  title,
-  avatarUrl,
-}: {
-  title: string;
-  avatarUrl: string;
-}) => {
+export const TopHeader = ({ title }: { title: string }) => {
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -23,21 +19,7 @@ export const TopHeader = ({
             <Text style={styles.backButton}>&larr;</Text>
           </TouchableOpacity>
         )}
-
         <Text style={[styles.title]}>{title}</Text>
-
-        {!(isAddBookPage || isBookPreviewPage) && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Profile" as never)}
-          >
-            <Image
-              source={{
-                uri: avatarUrl,
-              }}
-              style={styles.avatar}
-            />
-          </TouchableOpacity>
-        )}
       </View>
     </SafeAreaView>
   );
@@ -45,36 +27,31 @@ export const TopHeader = ({
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.secondary,
+    paddingTop: 0,
   },
   headerContainer: {
-    height: 90,
+    height: sizes.headerHeight,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 15,
-    backgroundColor: "#D4DCDF",
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    backgroundColor: colors.secondary,
+    borderBottomLeftRadius: sizes.borderRadius,
+    borderBottomRightRadius: sizes.borderRadius,
+    width: "100%",
   },
   backButton: {
-    fontSize: 30,
+    fontSize: sizes.fontSizeLarge,
     fontWeight: "bold",
-    color: "#4B6E7C",
+    color: colors.primary,
     marginRight: 10,
   },
   title: {
-    fontSize: 40,
+    fontSize: sizes.fontSizeLarge,
     fontWeight: "bold",
-    color: "#4B6E7C",
+    color: colors.primary,
     textAlign: "left",
     flex: 1,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 4,
-    borderColor: "#4B6E7C",
   },
 });

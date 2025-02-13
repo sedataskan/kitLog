@@ -6,6 +6,8 @@ import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import HomeMainScreen from "../screens/HomeMainScreen";
 import LibraryScreen from "../screens/LibraryScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
 
 const Tab = createBottomTabNavigator();
 
@@ -31,7 +33,7 @@ export default function Navbar() {
             : { display: "none" },
 
           tabBarShowLabel: false,
-          tabBarActiveTintColor: "#4B6E7C",
+          tabBarActiveTintColor: colors.primary,
         };
       }}
     >
@@ -44,32 +46,31 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.background,
   },
   text: {
-    fontSize: 20,
-    color: "#000000",
+    fontSize: sizes.fontSizeLarge,
+    color: colors.primary,
   },
   screen: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000000",
+    backgroundColor: colors.background,
   },
   tabBar: {
     position: "absolute",
-    height: 80,
-    top: 775,
-    backgroundColor: "#D4DCDF",
-    shadowColor: "#000",
+    height: 70,
+    backgroundColor: colors.secondary,
+    shadowColor: colors.background,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 10,
+    shadowRadius: sizes.borderRadius,
     elevation: 5,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    width: "100%",
+    paddingHorizontal: 20,
   },
 });

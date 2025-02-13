@@ -7,6 +7,8 @@ import { useNavigation } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
 import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
 import { ScrollView } from "react-native-gesture-handler";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
 
 type AddBookScreenRouteProp = RouteProp<
   { params: { onBookAdded: (book: any) => void } },
@@ -28,10 +30,19 @@ export default function AddBookScreen({
   const [rating, setRating] = useState(0);
   const [image, setImage] = useState("");
   const [error, setError] = useState("");
+  const [errorFields, setErrorFields] = useState<string[]>([]);
 
   const handleSave = async () => {
-    if (!title || !author || !pages) {
-      setError("Title, Author, and Number of Pages are mandatory.");
+    const missingFields = [];
+    if (!title) missingFields.push("Title");
+    if (!author) missingFields.push("Author");
+    if (!pages) missingFields.push("Number of Pages");
+
+    if (missingFields.length > 0) {
+      setError(
+        `The following fields are mandatory: ${missingFields.join(", ")}`
+      );
+      setErrorFields(missingFields);
       return;
     }
 
@@ -53,6 +64,7 @@ export default function AddBookScreen({
       await AsyncStorage.setItem("books", JSON.stringify(books));
       alert("Book saved successfully!");
       setError("");
+      setErrorFields([]);
       setTitle("");
       setAuthor("");
       setPages("");
@@ -69,7 +81,7 @@ export default function AddBookScreen({
 
   return (
     <Layout title="Add Book">
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollView}>
         <KeyboardAvoidingScrollView contentContainerStyle={styles.container}>
           <View style={styles.topSection}>
             <Image
@@ -81,62 +93,71 @@ export default function AddBookScreen({
               style={styles.image}
             />
             <View style={styles.inputSection}>
+              <Rating
+                type="star"
+                ratingColor={colors.primary}
+                ratingBackgroundColor="transparent"
+                ratingCount={5}
+                imageSize={sizes.fontSizeLarge * 1.5}
+                fractions={1}
+                jumpValue={0.5}
+                onFinishRating={setRating}
+                style={{
+                  paddingVertical: 10,
+                  marginBottom: 10,
+                  backgroundColor: colors.background,
+                }}
+              />
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>
-                  Book Title <Text style={styles.mandatory}>*</Text>
+                  Title <Text style={styles.mandatory}>*</Text>
                 </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    errorFields.includes("Title") && styles.inputError,
+                  ]}
                   value={title}
                   onChangeText={setTitle}
                 />
               </View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>
-                  Author <Text style={styles.mandatory}>*</Text>
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  value={author}
-                  onChangeText={setAuthor}
-                />
-              </View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>
-                  Number of Pages <Text style={styles.mandatory}>*</Text>
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  value={pages}
-                  onChangeText={setPages}
-                  keyboardType="numeric"
-                />
-              </View>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Publication</Text>
-                <TextInput
-                  style={styles.input}
-                  value={publication}
-                  onChangeText={setPublication}
-                />
-              </View>
             </View>
           </View>
-          <Rating
-            type="heart"
-            ratingColor="#3498db"
-            ratingBackgroundColor="transparent"
-            ratingCount={5}
-            imageSize={40}
-            fractions={1}
-            jumpValue={0.5}
-            onFinishRating={setRating}
-            style={{
-              paddingVertical: 10,
-              marginBottom: 10,
-              backgroundColor: "transparent",
-            }}
-          />
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              Author <Text style={styles.mandatory}>*</Text>
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                errorFields.includes("Author") && styles.inputError,
+              ]}
+              value={author}
+              onChangeText={setAuthor}
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>
+              Number of Pages <Text style={styles.mandatory}>*</Text>
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                errorFields.includes("Number of Pages") && styles.inputError,
+              ]}
+              value={pages}
+              onChangeText={setPages}
+              keyboardType="numeric"
+            />
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Publication</Text>
+            <TextInput
+              style={styles.input}
+              value={publication}
+              onChangeText={setPublication}
+            />
+          </View>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Image URL</Text>
             <TextInput
@@ -155,7 +176,7 @@ export default function AddBookScreen({
           </View>
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.button}>
-            <Button color="#4B6E7C" title="Save Book" onPress={handleSave} />
+            <Button color={colors.primary} title="Save" onPress={handleSave} />
           </View>
         </KeyboardAvoidingScrollView>
       </ScrollView>
@@ -164,7 +185,11 @@ export default function AddBookScreen({
 }
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flexGrow: 1,
+  },
   container: {
+    flex: 1,
     padding: 20,
     alignItems: "center",
   },
@@ -183,34 +208,40 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 5,
-    color: "#000",
+    color: colors.textPrimary,
+    fontSize: sizes.fontSizeSmall,
   },
   mandatory: {
-    color: "#4B6E7C",
+    color: colors.primary,
+    fontSize: sizes.fontSizeSmall,
   },
   input: {
     width: "100%",
     padding: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: colors.secondary,
     borderRadius: 5,
-    color: "#000",
+    color: colors.textPrimary,
+  },
+  inputError: {
+    borderColor: colors.error,
   },
   image: {
     width: 120,
     height: 180,
-    borderRadius: 10,
-    backgroundColor: "#D3D3D3",
+    borderRadius: sizes.borderRadius,
+    backgroundColor: colors.backgroundSecondary,
   },
   button: {
     marginTop: 20,
     width: 150,
-    borderRadius: 8,
+    borderRadius: sizes.borderRadius,
     borderWidth: 2,
-    borderColor: "#D4DCDF",
+    borderColor: colors.secondary,
   },
   error: {
-    color: "red",
+    color: colors.error,
     marginBottom: 10,
+    fontSize: sizes.fontSizeSmall,
   },
 });
