@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Text, TextInput, Button, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  Button,
+  Image,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import { Layout } from "../layout/layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Rating } from "react-native-ratings";
@@ -9,9 +18,12 @@ import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scrol
 import { ScrollView } from "react-native-gesture-handler";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
+import { Picker } from "@react-native-picker/picker";
 
 type AddBookScreenRouteProp = RouteProp<
-  { params: { onBookAdded: (book: any) => void } },
+  {
+    params: { onBookAdded: (book: any) => void; book?: any; isEdit?: boolean };
+  },
   "params"
 >;
 
@@ -20,23 +32,39 @@ export default function AddBookScreen({
 }: {
   route: AddBookScreenRouteProp;
 }) {
-  const { onBookAdded } = route.params;
+  const { onBookAdded = () => {}, book, isEdit } = route.params;
   const navigation = useNavigation();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [pages, setPages] = useState("");
   const [publication, setPublication] = useState("");
   const [review, setReview] = useState("");
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(2.5);
   const [image, setImage] = useState("");
   const [error, setError] = useState("");
   const [errorFields, setErrorFields] = useState<string[]>([]);
+  const [status, setStatus] = useState("");
+  const [isPickerVisible, setPickerVisible] = useState(false);
+
+  useEffect(() => {
+    if (isEdit && book) {
+      setTitle(book.title);
+      setAuthor(book.author);
+      setPages(book.pages);
+      setPublication(book.publication);
+      setReview(book.review);
+      setRating(book.rating);
+      setImage(book.image);
+      setStatus(book.status);
+    }
+  }, [isEdit, book]);
 
   const handleSave = async () => {
     const missingFields = [];
     if (!title) missingFields.push("Title");
     if (!author) missingFields.push("Author");
     if (!pages) missingFields.push("Number of Pages");
+    if (!status) missingFields.push("Status");
 
     if (missingFields.length > 0) {
       setError(
@@ -46,7 +74,7 @@ export default function AddBookScreen({
       return;
     }
 
-    const book = {
+    const newBook = {
       title,
       author,
       pages,
@@ -54,15 +82,24 @@ export default function AddBookScreen({
       review,
       rating: rating || 2.5,
       image,
-      saveDate: new Date().toISOString(),
+      saveDate: new Date(),
+      status,
     };
 
     try {
       const existingBooks = await AsyncStorage.getItem("books");
       const books = existingBooks ? JSON.parse(existingBooks) : [];
-      books.push(book);
-      await AsyncStorage.setItem("books", JSON.stringify(books));
-      alert("Book saved successfully!");
+      if (isEdit) {
+        const updatedBooks = books.map((b: any) =>
+          b.title === book.title ? newBook : b
+        );
+        await AsyncStorage.setItem("books", JSON.stringify(updatedBooks));
+        alert("Book updated successfully!");
+      } else {
+        books.push(newBook);
+        await AsyncStorage.setItem("books", JSON.stringify(books));
+        alert("Book saved successfully!");
+      }
       setError("");
       setErrorFields([]);
       setTitle("");
@@ -70,19 +107,27 @@ export default function AddBookScreen({
       setPages("");
       setPublication("");
       setReview("");
-      setRating(0);
+      setRating(2.5);
       setImage("");
-      onBookAdded(book);
-      navigation.navigate("BookPreview" as never, { book });
+      setStatus("");
+      onBookAdded(newBook);
+      navigation.navigate("BookPreview" as never, { book: newBook });
     } catch (error) {
       console.error("Error saving book", error);
     }
   };
 
+  const handleBackPress = () => {
+    navigation.navigate("Library" as never);
+  };
+
   return (
-    <Layout title="Add Book">
+    <Layout title={isEdit ? "Edit Book" : "Add Book"}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <KeyboardAvoidingScrollView contentContainerStyle={styles.container}>
+          <TouchableOpacity onPress={handleBackPress}>
+            <Text style={styles.backButton}>&larr; Back</Text>
+          </TouchableOpacity>
           <View style={styles.topSection}>
             <Image
               source={
@@ -101,6 +146,7 @@ export default function AddBookScreen({
                 imageSize={sizes.fontSizeLarge * 1.5}
                 fractions={1}
                 jumpValue={0.5}
+                startingValue={rating}
                 onFinishRating={setRating}
                 style={{
                   paddingVertical: 10,
@@ -120,6 +166,49 @@ export default function AddBookScreen({
                   value={title}
                   onChangeText={setTitle}
                 />
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Status</Text>
+                <TouchableOpacity
+                  style={styles.dropdown}
+                  onPress={() => setPickerVisible(true)}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownText,
+                      errorFields.includes("Status") && styles.inputError,
+                    ]}
+                  >
+                    {status || "Select Status"}
+                  </Text>
+                </TouchableOpacity>
+                <Modal
+                  visible={isPickerVisible}
+                  transparent={true}
+                  animationType="slide"
+                  onRequestClose={() => setPickerVisible(false)}
+                >
+                  <View style={styles.bottomPickerContainer}>
+                    <View style={styles.pickerHeader}>
+                      <Button
+                        title="Done"
+                        onPress={() => setPickerVisible(false)}
+                      />
+                    </View>
+                    <Picker
+                      selectedValue={status}
+                      onValueChange={(itemValue) => {
+                        setStatus(itemValue);
+                        setPickerVisible(false);
+                      }}
+                      style={styles.picker}
+                    >
+                      <Picker.Item label="To Read" value="To Read" />
+                      <Picker.Item label="Read" value="Read" />
+                      <Picker.Item label="Reading" value="Reading" />
+                    </Picker>
+                  </View>
+                </Modal>
               </View>
             </View>
           </View>
@@ -243,5 +332,42 @@ const styles = StyleSheet.create({
     color: colors.error,
     marginBottom: 10,
     fontSize: sizes.fontSizeSmall,
+  },
+  dropdown: {
+    width: "100%",
+    padding: 10,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+    borderRadius: 5,
+    justifyContent: "center",
+  },
+  dropdownText: {
+    color: colors.textPrimary,
+  },
+  bottomPickerContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary,
+  },
+  picker: {
+    width: "100%",
+    backgroundColor: colors.background,
+    borderRadius: 5,
+  },
+  backButton: {
+    fontSize: sizes.fontSizeLarge,
+    fontWeight: "bold",
+    color: colors.primary,
+    marginBottom: 10,
   },
 });

@@ -1,7 +1,6 @@
 import { StyleSheet, ScrollView, View, TouchableOpacity } from "react-native";
 import { Layout } from "../layout/layout";
 import { Book } from "../components/book";
-import SearchBox from "../components/searchBox";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -14,7 +13,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function LibraryScreen() {
   const navigation = useNavigation();
-  const [searchQuery, setSearchQuery] = useState("");
   const [books, setBooks] = useState<
     {
       title: string;
@@ -24,6 +22,7 @@ export default function LibraryScreen() {
       publication: string;
       review?: string;
       rating: number;
+      status: string;
     }[]
   >([]);
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
@@ -67,7 +66,8 @@ export default function LibraryScreen() {
 
   const filteredBooks = books.filter((book) => {
     return (
-      (!filters.name || book.title.toLowerCase().includes(filters.name.toLowerCase())) &&
+      (!filters.name ||
+        book.title.toLowerCase().includes(filters.name.toLowerCase())) &&
       (!filters.status || book.status === filters.status) &&
       (!filters.rating || book.rating === filters.rating)
     );
@@ -81,6 +81,7 @@ export default function LibraryScreen() {
     pages: string;
     publication: string;
     rating: number;
+    status: string;
   }) => {
     setBooks((prevBooks) => {
       const updatedBooks = [newBook, ...prevBooks];
@@ -100,6 +101,9 @@ export default function LibraryScreen() {
           <Ionicons name="filter" size={24} color="white" />
         </TouchableOpacity>
       }
+      menuVisible={false}
+      setMenuVisible={() => {}}
+      handleEdit={() => {}}
     >
       <AddButton
         onPress={() =>
@@ -126,6 +130,7 @@ export default function LibraryScreen() {
               publication={book.publication}
               review={book.review || ""}
               rating={book.rating}
+              status={book.status}
             />
           ))}
         </ScrollView>
