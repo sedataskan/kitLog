@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
     borderRadius: sizes.borderRadius,
     borderColor: colors.secondary,
     borderWidth: 2,
-    marginTop: 4,
-    marginLeft: 8,
-    marginRight: 8,
+    marginTop: 12,
+    marginLeft: 12,
+    marginRight: 12,
   },
   icon: {
     marginLeft: 8,
