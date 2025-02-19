@@ -1,13 +1,5 @@
-import React from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  Image,
-  ScrollView,
-  Button,
-  Alert,
-} from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, Text, Image, ScrollView, Alert } from "react-native";
 import { Layout } from "../layout/layout";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { Rating } from "react-native-ratings";
@@ -27,16 +19,31 @@ type BookPreviewScreenRouteProp = RouteProp<
         rating: number;
         image: string;
         saveDate: Date;
+        status: string;
       };
     };
   },
   "params"
 >;
 
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case "Read":
+      return styles.statusRead;
+    case "Reading":
+      return styles.statusReading;
+    case "To Read":
+      return styles.statusToRead;
+    default:
+      return styles.statusToRead;
+  }
+};
+
 export default function BookPreviewScreen() {
   const route = useRoute<BookPreviewScreenRouteProp>();
   const navigation = useNavigation();
   const { book } = route.params;
+  const [menuVisible, setMenuVisible] = useState(false);
 
   if (!book) {
     return (
@@ -48,7 +55,22 @@ export default function BookPreviewScreen() {
     );
   }
 
+  const parsedBook = {
+    ...book,
+    saveDate: new Date(book.saveDate),
+    status: book.status ? book.status : "To Read",
+  };
+
+  const handleEdit = () => {
+    setMenuVisible(false);
+    navigation.navigate("AddBook", {
+      book: { ...parsedBook, saveDate: parsedBook.saveDate.toISOString() },
+      isEdit: true,
+    });
+  };
+
   const handleDelete = async () => {
+    setMenuVisible(false);
     Alert.alert("Delete Book", "Are you sure you want to delete this book?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -72,22 +94,31 @@ export default function BookPreviewScreen() {
   };
 
   return (
-    <Layout title={book.title}>
+    <Layout
+      title={parsedBook.title}
+      menuVisible={menuVisible}
+      setMenuVisible={setMenuVisible}
+      handleEdit={handleEdit}
+      handleDelete={handleDelete}
+    >
       <ScrollView contentContainerStyle={styles.container}>
         <Image
           source={
-            book.image
-              ? { uri: book.image }
+            parsedBook.image
+              ? { uri: parsedBook.image }
               : require("../../assets/images/unknownBook.jpg")
           }
           style={styles.image}
         />
-        <Text style={styles.title}>{book.title}</Text>
-        <Text style={styles.author}>{book.author}</Text>
+        <Text style={styles.title}>{parsedBook.title}</Text>
+        <Text style={styles.author}>{parsedBook.author}</Text>
         <Text style={styles.date}>
-          {book.saveDate
-            ? new Date(book.saveDate).toLocaleDateString()
+          {parsedBook.saveDate
+            ? new Date(parsedBook.saveDate).toLocaleDateString()
             : "No Date Added"}
+        </Text>
+        <Text style={[styles.status, getStatusStyle(parsedBook.status)]}>
+          {parsedBook.status}
         </Text>
         <Rating
           type="star"
@@ -98,7 +129,7 @@ export default function BookPreviewScreen() {
           fractions={1}
           jumpValue={0.5}
           readonly
-          startingValue={book.rating}
+          startingValue={parsedBook.rating}
           style={{
             paddingVertical: 10,
             backgroundColor: colors.background,
@@ -107,19 +138,16 @@ export default function BookPreviewScreen() {
         <View style={styles.textContainer}>
           <View style={styles.detailsSection}>
             <Text style={styles.label}>Pages</Text>
-            <Text style={styles.value}>{book.pages}</Text>
+            <Text style={styles.value}>{parsedBook.pages}</Text>
             <Text style={styles.label}>Publication</Text>
             <Text style={styles.value}>
-              {book.publication ? book.publication : "Unknown"}
+              {parsedBook.publication ? parsedBook.publication : "Unknown"}
             </Text>
             <Text style={styles.label}>Review</Text>
             <Text style={styles.value}>
-              {book.review ? book.review : "No Comment Added"}
+              {parsedBook.review ? parsedBook.review : "No Comment Added"}
             </Text>
           </View>
-        </View>
-        <View style={styles.button}>
-          <Button color={colors.error} title="Delete" onPress={handleDelete} />
         </View>
       </ScrollView>
     </Layout>
@@ -178,6 +206,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     marginBottom: 10,
   },
+  status: {
+    marginBottom: 5,
+    padding: 5,
+    borderRadius: sizes.borderRadius,
+    textAlign: "center",
+    fontSize: sizes.fontSizeSmall,
+  },
+  statusRead: {
+    backgroundColor: "green",
+    color: "white",
+  },
+  statusReading: {
+    backgroundColor: "orange",
+    color: "white",
+  },
+  statusToRead: {
+    backgroundColor: "blue",
+    color: "white",
+  },
   errorText: {
     color: colors.error,
     fontSize: sizes.fontSizeMedium,
@@ -188,5 +235,10 @@ const styles = StyleSheet.create({
     borderRadius: sizes.borderRadius,
     borderWidth: 2,
     borderColor: colors.error,
+  },
+  menuButton: {
+    fontSize: sizes.fontSizeLarge,
+    color: colors.textPrimary,
+    padding: 10,
   },
 });

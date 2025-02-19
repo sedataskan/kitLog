@@ -19,6 +19,7 @@ export default function HomeMainScreen() {
       pages: string;
       publication: string;
       rating: number;
+      status: string;
     }[]
   >([]);
   const [recentReviews, setRecentReviews] = useState<
@@ -57,12 +58,20 @@ export default function HomeMainScreen() {
     pages: string;
     publication: string;
     rating: number;
+    status: string;
   }) => {
     setRecentBooks((prevBooks) => [newBook, ...prevBooks].slice(0, 2));
   };
 
   return (
-    <Layout title="Home">
+    <Layout
+      title="Home"
+      rightComponent={<></>}
+      menuVisible={false}
+      setMenuVisible={() => {}}
+      handleEdit={() => {}}
+      handleDelete={() => {}}
+    >
       <View style={styles.section}>
         <Text style={styles.sectionTitleTop}>Recently Saved Books</Text>
         <View style={styles.featuredBooksContainer}>
@@ -76,6 +85,7 @@ export default function HomeMainScreen() {
                 publication={book.publication}
                 review={book.review || ""}
                 rating={book.rating}
+                status={book.status}
               />
             </View>
           ))}

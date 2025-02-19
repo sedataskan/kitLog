@@ -2,10 +2,25 @@ import { StyleSheet, View } from "react-native";
 import { TopHeader } from "../components/topHeader";
 import { colors } from "../constants/colors";
 
-export function Layout({ children, title, rightComponent }: any) {
+export function Layout({
+  children,
+  title,
+  rightComponent,
+  menuVisible,
+  setMenuVisible,
+  handleEdit,
+  handleDelete,
+}: any) {
   return (
     <View style={styles.container}>
-      <TopHeader title={title} rightComponent={rightComponent} />
+      <TopHeader
+        title={title}
+        rightComponent={rightComponent}
+        menuVisible={menuVisible}
+        setMenuVisible={setMenuVisible}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+      />
       {children}
     </View>
   );

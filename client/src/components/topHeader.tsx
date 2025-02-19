@@ -1,25 +1,83 @@
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
+import { Menu, MenuItem, MenuDivider } from "react-native-material-menu";
 
-export const TopHeader = ({ title, rightComponent }: { title: string, rightComponent?: React.ReactNode }) => {
+export const TopHeader = ({
+  title,
+  rightComponent,
+  menuVisible,
+  setMenuVisible,
+  handleEdit,
+  handleDelete,
+}: {
+  title: string;
+  rightComponent?: React.ReactNode;
+  menuVisible?: boolean;
+  setMenuVisible?: (visible: boolean) => void;
+  handleEdit?: () => void;
+  handleDelete?: () => void;
+}) => {
   const navigation = useNavigation();
   const route = useRoute();
 
   const isAddBookPage = route.name === "AddBook";
   const isBookPreviewPage = route.name === "BookPreview";
 
+  const handleBackPress = () => {
+    if (isAddBookPage) {
+      const book = route.params?.book;
+      navigation.navigate("BookPreview" as never, { book });
+    } else if (isBookPreviewPage) {
+      navigation.navigate("Main" as never);
+    } else {
+      navigation.goBack();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerContainer}>
         {(isAddBookPage || isBookPreviewPage) && (
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={handleBackPress}>
             <Text style={styles.backButton}>&larr;</Text>
           </TouchableOpacity>
         )}
         <Text style={[styles.title]}>{title}</Text>
-        {rightComponent && <View style={styles.rightComponent}>{rightComponent}</View>}
+        {isBookPreviewPage &&
+          menuVisible !== undefined &&
+          setMenuVisible &&
+          handleEdit &&
+          handleDelete && (
+            <Menu
+              visible={menuVisible}
+              anchor={
+                <TouchableOpacity onPress={() => setMenuVisible(true)}>
+                  <Text style={styles.menuButton}>⋮</Text>
+                </TouchableOpacity>
+              }
+              onRequestClose={() => setMenuVisible(false)}
+            >
+              <MenuItem onPress={handleEdit}>Edit</MenuItem>
+              <MenuDivider />
+              <MenuItem
+                onPress={handleDelete}
+                textStyle={{ color: colors.error }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          )}
+        {rightComponent && (
+          <View style={styles.rightComponent}>{rightComponent}</View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -43,7 +101,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     backgroundColor: colors.secondary,
     width: "100%",
-    
   },
   backButton: {
     fontSize: sizes.fontSizeLarge,
@@ -59,7 +116,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rightComponent: {
-    marginLeft: 'auto',
+    marginLeft: "auto",
     paddingBottom: 4,
+  },
+  menuButton: {
+    fontSize: sizes.fontSizeLarge,
+    color: colors.textPrimary,
+    padding: 10,
   },
 });
