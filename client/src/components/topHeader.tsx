@@ -1,10 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 
-export const TopHeader = ({ title }: { title: string }) => {
+export const TopHeader = ({ title, rightComponent }: { title: string, rightComponent?: React.ReactNode }) => {
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -20,6 +19,7 @@ export const TopHeader = ({ title }: { title: string }) => {
           </TouchableOpacity>
         )}
         <Text style={[styles.title]}>{title}</Text>
+        {rightComponent && <View style={styles.rightComponent}>{rightComponent}</View>}
       </View>
     </SafeAreaView>
   );
@@ -28,7 +28,12 @@ export const TopHeader = ({ title }: { title: string }) => {
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: colors.secondary,
-    paddingTop: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 10,
   },
   headerContainer: {
     height: sizes.headerHeight,
@@ -37,9 +42,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 15,
     backgroundColor: colors.secondary,
-    borderBottomLeftRadius: sizes.borderRadius,
-    borderBottomRightRadius: sizes.borderRadius,
     width: "100%",
+    
   },
   backButton: {
     fontSize: sizes.fontSizeLarge,
@@ -53,5 +57,9 @@ const styles = StyleSheet.create({
     color: colors.primary,
     textAlign: "left",
     flex: 1,
+  },
+  rightComponent: {
+    marginLeft: 'auto',
+    paddingBottom: 4,
   },
 });

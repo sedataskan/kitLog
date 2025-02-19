@@ -19,7 +19,7 @@ export default function AddButton({ onPress }: { onPress: () => void }) {
 const styles = StyleSheet.create({
   floatingButton: {
     position: "absolute",
-    top: 720,
+    bottom: 95, // Changed from top to bottom
     right: 20,
     width: 50,
     height: 50,

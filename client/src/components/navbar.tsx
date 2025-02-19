@@ -25,7 +25,12 @@ export default function Navbar() {
             else if (route.name === "Library") iconName = "library-outline";
             else if (route.name === "Profile") iconName = "person-outline";
             return (
-              <Ionicons name={iconName as any} size={size} color={color} />
+              <Ionicons
+                name={iconName as any}
+                size={size}
+                color={color}
+                style={styles.tabBarIcon}
+              />
             );
           },
           tabBarStyle: allowRoutes.includes(routeName)
@@ -60,17 +65,20 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     position: "absolute",
-    height: 70,
+    height: 80, // Increase height
     backgroundColor: colors.secondary,
-    shadowColor: colors.background,
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: "#000", // Add shadow above the tab bar
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: -2 },
     shadowRadius: sizes.borderRadius,
-    elevation: 5,
+    elevation: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 20,
+  },
+  tabBarIcon: {
+    marginTop: -10, // Move icons closer to the top of the tab bar
   },
 });

@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, View } from "react-native";
+import { StyleSheet, ScrollView, View, TouchableOpacity } from "react-native";
 import { Layout } from "../layout/layout";
 import { Book } from "../components/book";
 import SearchBox from "../components/searchBox";
@@ -9,6 +9,8 @@ import AddButton from "../components/addButton";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { useCallback } from "react";
+import FilterModal from "../components/filterModal";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LibraryScreen() {
   const navigation = useNavigation();
@@ -24,6 +26,12 @@ export default function LibraryScreen() {
       rating: number;
     }[]
   >([]);
+  const [isFilterModalVisible, setFilterModalVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "",
+    rating: 0,
+    name: "",
+  });
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -57,11 +65,13 @@ export default function LibraryScreen() {
     }, [])
   );
 
-  const filteredBooks = searchQuery
-    ? books.filter((book) =>
-        book.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : books;
+  const filteredBooks = books.filter((book) => {
+    return (
+      (!filters.name || book.title.toLowerCase().includes(filters.name.toLowerCase())) &&
+      (!filters.status || book.status === filters.status) &&
+      (!filters.rating || book.rating === filters.rating)
+    );
+  });
 
   const handleBookAdded = (newBook: {
     title: string;
@@ -80,7 +90,17 @@ export default function LibraryScreen() {
   };
 
   return (
-    <Layout title="Library">
+    <Layout
+      title="Library"
+      rightComponent={
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setFilterModalVisible(true)}
+        >
+          <Ionicons name="filter" size={24} color="white" />
+        </TouchableOpacity>
+      }
+    >
       <AddButton
         onPress={() =>
           navigation.navigate("AddBook", {
@@ -88,11 +108,13 @@ export default function LibraryScreen() {
           })
         }
       />
+      <FilterModal
+        visible={isFilterModalVisible}
+        onClose={() => setFilterModalVisible(false)}
+        onApplyFilters={setFilters}
+        filters={filters}
+      />
       <View style={styles.container}>
-        <SearchBox
-          placeholder="Search by title"
-          onChangeText={setSearchQuery}
-        />
         <ScrollView contentContainerStyle={styles.contentContainer}>
           {filteredBooks.map((book, index) => (
             <Book
@@ -122,5 +144,10 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     paddingBottom: 300,
+  },
+  filterButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    padding: 8,
   },
 });
