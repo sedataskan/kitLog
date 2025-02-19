@@ -1,0 +1,31 @@
+name: Delete Old Merged Branches
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Her Pazartesi gece 00:00'da çalışır
+  workflow_dispatch: # Manuel çalıştırmak için
+
+jobs:
+  delete-old-branches:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Delete merged branches
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          REPO_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git clone --depth=1 $REPO_URL repo
+          cd repo
+
+          git fetch --prune
+          MERGED_BRANCHES=$(git branch -r --merged origin/main | grep -v "main" | grep -v "dev" | awk -F'/' '{print $2}')
+
+          for BRANCH in $MERGED_BRANCHES; do
+            echo "Deleting branch: $BRANCH"
+            git push origin --delete $BRANCH
+          done
