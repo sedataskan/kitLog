@@ -245,14 +245,6 @@ export default function AddBookScreen({
             />
           </View>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Image URL</Text>
-            <TextInput
-              style={styles.input}
-              value={image}
-              onChangeText={setImage}
-            />
-          </View>
-          <View style={styles.inputContainer}>
             <Text style={styles.label}>Review</Text>
             <TextInput
               style={styles.input}

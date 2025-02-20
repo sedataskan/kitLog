@@ -28,7 +28,7 @@ export const TopHeader = ({
   const isBookPreviewPage = route.name === "BookPreview";
 
   const handleBackPress = () => {
-    if (isAddBookPage) {
+    if (isAddBookPage && route.params?.book) {
       const book = route.params?.book;
       navigation.navigate("BookPreview" as never, { book });
     } else if (isBookPreviewPage) {
