@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "kitApp",
-    "slug": "kitApp",
+    "slug": "kitapp",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/KITAPP.png",
