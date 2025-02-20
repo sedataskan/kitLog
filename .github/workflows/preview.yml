@@ -26,7 +26,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: npm
+
+      - name: Debug EXPO_TOKEN
+        run: echo "EXPO_TOKEN is set"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
