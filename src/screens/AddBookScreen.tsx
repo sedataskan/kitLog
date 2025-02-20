@@ -117,10 +117,6 @@ export default function AddBookScreen({
     }
   };
 
-  const handleBackPress = () => {
-    navigation.navigate("Library" as never);
-  };
-
   return (
     <Layout title={isEdit ? "Edit Book" : "Add Book"}>
       <ScrollView contentContainerStyle={styles.scrollView}>
