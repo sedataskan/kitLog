@@ -125,9 +125,6 @@ export default function AddBookScreen({
     <Layout title={isEdit ? "Edit Book" : "Add Book"}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <KeyboardAvoidingScrollView contentContainerStyle={styles.container}>
-          <TouchableOpacity onPress={handleBackPress}>
-            <Text style={styles.backButton}>&larr; Back</Text>
-          </TouchableOpacity>
           <View style={styles.topSection}>
             <Image
               source={
@@ -199,9 +196,9 @@ export default function AddBookScreen({
                       selectedValue={status}
                       onValueChange={(itemValue) => {
                         setStatus(itemValue);
-                        setPickerVisible(false);
                       }}
                       style={styles.picker}
+                      itemStyle={styles.dropdownText}
                     >
                       <Picker.Item label="To Read" value="To Read" />
                       <Picker.Item label="Read" value="Read" />

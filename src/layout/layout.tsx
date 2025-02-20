@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { TopHeader } from "../components/topHeader";
 import { colors } from "../constants/colors";
+import React from "react";
 
 export function Layout({
   children,

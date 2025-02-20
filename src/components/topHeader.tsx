@@ -1,16 +1,10 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import {
-  SafeAreaView,
-} from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Menu, MenuItem, MenuDivider } from "react-native-material-menu";
+import React from "react";
 
 export const TopHeader = ({
   title,
