@@ -2,7 +2,7 @@
   "expo": {
     "name": "kitApp",
     "slug": "kitapp",
-    "version": "1.0.2",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/KITAPP.png",
     "userInterfaceStyle": "automatic",
@@ -33,7 +33,7 @@
       }
     },
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "1.0.1"
     },
     "updates": {
       "url": "https://u.expo.dev/9e7672bc-9005-4f26-93e7-555c6663c725"
