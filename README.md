@@ -8,7 +8,7 @@
 
 <p align="center">
     <a align="center" href="https://www.figma.com/design/WNHTNxjdWG4zuOxg5lJqP0/book-tracker?node-id=7-154&t=QdXOgB5N5TzqP5IB-1">
-        Figma Design Document
+        Figma Design Document 🎨
     </a>
 </p>
 
