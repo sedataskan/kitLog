@@ -9,10 +9,14 @@ jobs:
   delete-branch:
     runs-on: ubuntu-latest
     steps:
+      - name: Check if the branch was merged
+        if: github.event.pull_request.merged == true
+        run: echo "Branch was merged, proceeding with deletion."
+
       - name: Delete branch if merged
+        if: github.event.pull_request.merged == true
         uses: octokit/request-action@v2.x
         with:
-          route: DELETE /repos/sedataskan/kitApp/git/refs/heads/:branch
+          route: DELETE /repos/sedataskan/kitApp/git/refs/heads/${{ github.event.pull_request.head.ref }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: github.event.pull_request.merged == true
