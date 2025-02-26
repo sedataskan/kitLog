@@ -1,68 +1,10 @@
-import { View, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { Layout } from "../layout/layout";
-import { Book } from "../components/book";
-import React, { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import AddButton from "../components/addButton";
+import React from "react";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 
 export default function HomeMainScreen() {
-  const navigation = useNavigation();
-  const [recentBooks, setRecentBooks] = useState<
-    {
-      title: string;
-      author: string;
-      review?: string;
-      image: string;
-      pages: string;
-      publication: string;
-      rating: number;
-      status: string;
-    }[]
-  >([]);
-  const [recentReviews, setRecentReviews] = useState<
-    { title: string; review: string }[]
-  >([]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchBooks = async () => {
-        try {
-          const storedBooks = await AsyncStorage.getItem("books");
-          if (storedBooks) {
-            const books = JSON.parse(storedBooks);
-            setRecentBooks(books.slice(-2).reverse());
-            setRecentReviews(
-              books
-                .filter((book: { review: any }) => book.review)
-                .slice(-3)
-                .reverse()
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching books from local storage", error);
-        }
-      };
-
-      fetchBooks();
-    }, [])
-  );
-
-  const handleBookAdded = (newBook: {
-    title: string;
-    author: string;
-    review?: string;
-    image: string;
-    pages: string;
-    publication: string;
-    rating: number;
-    status: string;
-  }) => {
-    setRecentBooks((prevBooks) => [newBook, ...prevBooks].slice(0, 2));
-  };
-
   return (
     <Layout
       title="Home"
@@ -72,41 +14,7 @@ export default function HomeMainScreen() {
       handleEdit={() => {}}
       handleDelete={() => {}}
     >
-      <View style={styles.section}>
-        <Text style={styles.sectionTitleTop}>Recently Saved Books</Text>
-        <View style={styles.featuredBooksContainer}>
-          {recentBooks.map((book, index) => (
-            <View key={index} style={styles.bookContainer}>
-              <Book
-                title={book.title}
-                author={book.author}
-                image={book.image}
-                pages={book.pages}
-                publication={book.publication}
-                review={book.review || ""}
-                rating={book.rating}
-                status={book.status}
-              />
-            </View>
-          ))}
-        </View>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Reviews</Text>
-        {recentReviews.slice(0, 4).map((review, index) => (
-          <View key={index} style={styles.reviewContainer}>
-            <Text style={styles.reviewBook}>{review.title}</Text>
-            <Text style={styles.reviewText}>{review.review}</Text>
-          </View>
-        ))}
-      </View>
-      <AddButton
-        onPress={() =>
-          navigation.navigate("AddBook", {
-            onBookAdded: handleBookAdded,
-          })
-        }
-      />
+      <Text> Home Screen </Text>
     </Layout>
   );
 }

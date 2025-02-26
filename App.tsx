@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import AddBookScreen from "./src/screens/AddBookScreen";
 import Navbar from "./src/components/navbar";
 import BookPreviewScreen from "./src/screens/BookPreviewScreen";
+import React from "react";
 
 const Stack = createStackNavigator();
 

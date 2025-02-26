@@ -3,5 +3,5 @@ export const sizes = {
   fontSizeSmall: 12,
   fontSizeMedium: 16,
   fontSizeLarge: 25,
-  headerHeight: 50,
+  headerHeight: 40,
 };
