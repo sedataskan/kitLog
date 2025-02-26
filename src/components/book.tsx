@@ -58,7 +58,7 @@ export const Book = ({
         review,
         rating,
         saveDate: new Date(),
-        status: status || "To Read", // Ensure status is set correctly
+        status: status || "To Read",
       },
     });
   };
@@ -86,7 +86,7 @@ export const Book = ({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    margin: 25,
+    margin: 15,
     borderRadius: sizes.borderRadius,
   },
   imageContainer: {
@@ -94,7 +94,6 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: sizes.borderRadius,
     backgroundColor: colors.secondary,
-    marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
   },

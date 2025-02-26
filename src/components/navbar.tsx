@@ -65,9 +65,9 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     position: "absolute",
-    height: 80, // Increase height
+    height: 80,
     backgroundColor: colors.secondary,
-    shadowColor: "#000", // Add shadow above the tab bar
+    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: -2 },
     shadowRadius: sizes.borderRadius,
@@ -79,6 +79,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   tabBarIcon: {
-    marginTop: -10, // Move icons closer to the top of the tab bar
+    marginTop: -10,
   },
 });
