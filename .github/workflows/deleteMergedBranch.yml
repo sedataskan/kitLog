@@ -12,7 +12,7 @@ jobs:
       - name: Delete branch if merged
         uses: octokit/request-action@v2.x
         with:
-          route: DELETE /repos/:owner/:repo/git/refs/heads/:branch
+          route: DELETE /repos/sedataskan/kitApp/git/refs/heads/:branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: github.event.pull_request.merged == true
