@@ -9,10 +9,16 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m1-medium"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "distribution": "internal",
+      "ios": {
+        "resourceClass": "m1-medium"
+      }
     }
   },
   "submit": {

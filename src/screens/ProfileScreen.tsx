@@ -6,6 +6,7 @@ import { sizes } from "../constants/sizes";
 import { useFocusEffect } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Layout } from "../layout/layout";
+import VersionScreen from "../components/versionScreen";
 
 export default function ProfileScreen() {
   const [totalBooks, setTotalBooks] = useState(0);
@@ -84,6 +85,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </View>
+      <VersionScreen />
     </Layout>
   );
 }

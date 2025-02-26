@@ -2,15 +2,19 @@
   "expo": {
     "name": "kitApp",
     "slug": "kitapp",
-    "version": "1.0.1",
-    "runtimeVersion": "1.0.1",
+    "version": "1.0.6",
+    "owner": "osntus",
+    "runtimeVersion": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/KITAPP.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ombayus.kitApp"
+      "bundleIdentifier": "com.ombayus.kitApp",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "splash": {
       "image": "./assets/images/KITAPP.png",
@@ -34,7 +38,10 @@
       }
     },
     "updates": {
-      "url": "https://u.expo.dev/9e7672bc-9005-4f26-93e7-555c6663c725"
+      "url": "https://u.expo.dev/576a42b0-261c-449e-b9d5-26cc34c7e2f0",
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD"
     }
   }
 }
