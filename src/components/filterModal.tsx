@@ -35,13 +35,19 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
   const [status, setStatus] = useState("");
   const [rating, setRating] = useState(0);
   const [name, setName] = useState("");
-  const translateY = useSharedValue(0);
-  const backgroundOpacity = useSharedValue(1);
+  const translateY = useSharedValue(1000);
+  const backgroundOpacity = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
-      translateY.value = withSpring(0);
+      translateY.value = withSpring(0, {
+        damping: 20,
+        stiffness: 90,
+      });
       backgroundOpacity.value = withSpring(1);
+    } else {
+      translateY.value = 1000;
+      backgroundOpacity.value = 0;
     }
   }, [visible]);
 
@@ -109,7 +115,6 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
                 <Ionicons name="close" size={24} color="black" />
               </TouchableOpacity>
             </View>
-            <View style={styles.headerBorder} />
             <View style={styles.contentContainer}>
               <TextInput
                 placeholder="Name"
@@ -178,6 +183,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    transform: [{ translateY: 0 }],
   },
   header: {
     flexDirection: "row",
@@ -187,7 +193,7 @@ const styles = StyleSheet.create({
     paddingRight: 15,
     paddingLeft: 15,
     paddingTop: 15,
-    paddingBottom: 5,
+    paddingBottom: 15,
   },
   contentContainer: {
     paddingRight: 20,
