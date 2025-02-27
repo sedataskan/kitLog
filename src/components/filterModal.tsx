@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  Button,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../constants/colors";
@@ -20,6 +21,7 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { StarRating } from './StarRating';
+import { Picker } from '@react-native-picker/picker';
 
 interface FilterModalProps {
   visible: boolean;
@@ -38,6 +40,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
   const [name, setName] = useState("");
   const translateY = useSharedValue(1000);
   const backgroundOpacity = useSharedValue(0);
+  const [isPickerVisible, setPickerVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -117,10 +120,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
   return (
     <Modal visible={visible} animationType="none" transparent>
       <Animated.View style={[styles.modalBackground, animatedBackgroundStyle]}>
-        <PanGestureHandler 
-          onGestureEvent={gestureHandler}
-          minDist={10}
-        >
+        <PanGestureHandler onGestureEvent={gestureHandler} minDist={10}>
           <Animated.View style={[styles.modalContainer, animatedStyle]}>
             <View style={styles.header}>
               <Text style={styles.title}>Filter Books</Text>
@@ -129,27 +129,33 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
               </TouchableOpacity>
             </View>
             <View style={styles.contentContainer}>
-              <TextInput
-                placeholder="Name"
-                placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-              />
-              <TextInput
-                placeholder="Status (Disabled)"
-                placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
-                value={status}
-                onChangeText={setStatus}
-                style={styles.input}
-                editable={false}
-              />
-              <View
-                style={[
-                  styles.ratingContainer,
-                  rating > 0 && styles.ratingApplied,
-                ]}
-              >
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Name</Text>
+                <TextInput
+                  placeholder="Enter name"
+                  placeholderTextColor={colors.textSecondary}
+                  value={name}
+                  onChangeText={setName}
+                  style={styles.input}
+                />
+              </View>
+              
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Status</Text>
+                <TouchableOpacity
+                  style={styles.input}
+                  onPress={() => setPickerVisible(true)}
+                >
+                  <Text style={[
+                    styles.dropdownText,
+                    !status && styles.placeholderText
+                  ]}>
+                    {status || "Select Status"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={[styles.ratingContainer, rating > 0 && styles.ratingApplied]}>
                 <View style={styles.ratingHeader}>
                   <Text style={styles.ratingLabel}>Minimum Rating</Text>
                   {rating > 0 && (
@@ -162,6 +168,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
                   size={30}
                 />
               </View>
+
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
                   style={styles.applyButton}
@@ -182,6 +189,37 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
           </Animated.View>
         </PanGestureHandler>
       </Animated.View>
+
+      <Modal
+        visible={isPickerVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setPickerVisible(false)}
+      >
+        <View style={styles.bottomPickerContainer}>
+          <View style={styles.pickerHeader}>
+            <Button
+              title="Done"
+              onPress={() => setPickerVisible(false)}
+            />
+          </View>
+          <Picker
+            selectedValue={status}
+            onValueChange={(itemValue) => {
+              setStatus(itemValue);
+              if (Platform.OS === 'android') {
+                setPickerVisible(false);
+              }
+            }}
+            style={styles.picker}
+          >
+            <Picker.Item label="All Status" value="" />
+            <Picker.Item label="To Read" value="To Read" />
+            <Picker.Item label="Read" value="Read" />
+            <Picker.Item label="Reading" value="Reading" />
+          </Picker>
+        </View>
+      </Modal>
     </Modal>
   );
 };
@@ -209,9 +247,9 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   contentContainer: {
-    paddingRight: 20,
-    paddingLeft: 20,
+    paddingHorizontal: 20,
     paddingTop: 5,
+    gap: 24,
   },
   title: {
     fontSize: 24,
@@ -224,19 +262,35 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     marginBottom: 20,
   },
+  inputContainer: {
+    width: "100%",
+  },
+  label: {
+    marginBottom: 8,
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: "500",
+  },
   input: {
-    height: 40,
-    borderColor: "gray",
+    width: "100%",
+    height: 48,
+    borderColor: colors.secondary,
     borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
     borderRadius: 5,
-    color: "black",
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    backgroundColor: "white",
+  },
+  dropdownText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+  },
+  placeholderText: {
+    color: colors.textSecondary,
   },
   ratingContainer: {
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    marginBottom: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     backgroundColor: '#f8f8f8',
     borderRadius: 8,
   },
@@ -291,6 +345,25 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 18,
     fontWeight: "bold",
+  },
+  bottomPickerContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary,
+  },
+  picker: {
+    width: "100%",
+    backgroundColor: colors.background,
   },
 });
 

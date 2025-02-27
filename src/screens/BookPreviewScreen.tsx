@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, StyleSheet, Text, Image, ScrollView, Alert } from "react-native";
 import { Layout } from "../layout/layout";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
-import { Rating } from "react-native-ratings";
+import { StarRating } from '../components/StarRating';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
@@ -120,21 +120,14 @@ export default function BookPreviewScreen() {
         <Text style={[styles.status, getStatusStyle(parsedBook.status)]}>
           {parsedBook.status}
         </Text>
-        <Rating
-          type="star"
-          ratingColor={colors.primary}
-          ratingBackgroundColor="transparent"
-          ratingCount={5}
-          imageSize={sizes.fontSizeLarge * 1.2}
-          fractions={1}
-          jumpValue={0.5}
-          readonly
-          startingValue={parsedBook.rating}
-          style={{
-            paddingVertical: 10,
-            backgroundColor: colors.background,
-          }}
-        />
+        <View style={styles.ratingContainer}>
+          <StarRating
+            rating={parsedBook.rating}
+            onRatingChange={() => {}}
+            size={sizes.fontSizeLarge * 1.2}
+            readonly
+          />
+        </View>
         <View style={styles.textContainer}>
           <View style={styles.detailsSection}>
             <Text style={styles.label}>Pages</Text>
@@ -240,5 +233,9 @@ const styles = StyleSheet.create({
     fontSize: sizes.fontSizeLarge,
     color: colors.textPrimary,
     padding: 10,
+  },
+  ratingContainer: {
+    paddingVertical: 10,
+    backgroundColor: colors.background,
   },
 });
