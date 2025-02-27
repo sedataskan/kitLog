@@ -68,7 +68,7 @@ export default function VersionScreen() {
           App Version: {Constants?.expoConfig?.version}
         </Text>
         <Text style={{ fontSize: 14, color: colors.secondary }}>
-          {updateStatus} - "test"
+          {updateStatus}
         </Text>
       </TouchableOpacity>
     </View>
