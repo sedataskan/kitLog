@@ -142,8 +142,6 @@ export default function LibraryScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
-    borderRadius: sizes.borderRadius,
   },
   contentContainer: {
     flexDirection: "row",

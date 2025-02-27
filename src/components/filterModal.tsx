@@ -20,15 +20,28 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 
-const FilterModal = ({ visible, onClose, onApplyFilters, filters }) => {
+interface FilterModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onApplyFilters: (filters: { status: string; rating: number; name: string }) => void;
+  filters: {
+    status: string;
+    rating: number;
+    name: string;
+  };
+}
+
+const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalProps) => {
   const [status, setStatus] = useState("");
   const [rating, setRating] = useState(0);
   const [name, setName] = useState("");
   const translateY = useSharedValue(0);
+  const backgroundOpacity = useSharedValue(1);
 
   useEffect(() => {
     if (visible) {
       translateY.value = withSpring(0);
+      backgroundOpacity.value = withSpring(1);
     }
   }, [visible]);
 
@@ -46,18 +59,28 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }) => {
     },
     onActive: (event, ctx) => {
       translateY.value = ctx.startY + event.translationY;
+      const opacity = Math.max(0, 1 - event.translationY / 400);
+      backgroundOpacity.value = opacity;
     },
     onEnd: (event) => {
       if (event.translationY > 100) {
-        runOnJS(onClose)();
+        translateY.value = withSpring(1000, {}, () => {
+          runOnJS(onClose)();
+        });
+        backgroundOpacity.value = withSpring(0);
       } else {
         translateY.value = withSpring(0);
+        backgroundOpacity.value = withSpring(1);
       }
     },
   });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
+  }));
+
+  const animatedBackgroundStyle = useAnimatedStyle(() => ({
+    backgroundColor: `rgba(0, 0, 0, ${backgroundOpacity.value * 0.5})`,
   }));
 
   const applyFilters = () => {
@@ -76,71 +99,71 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }) => {
   const hasFilters = status || rating || name;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalBackground}>
-        <Animated.View style={[styles.modalContainer, animatedStyle]}>
-          <PanGestureHandler onGestureEvent={gestureHandler}>
-            <Animated.View style={styles.header}>
+    <Modal visible={visible} animationType="none" transparent>
+      <Animated.View style={[styles.modalBackground, animatedBackgroundStyle]}>
+        <PanGestureHandler onGestureEvent={gestureHandler}>
+          <Animated.View style={[styles.modalContainer, animatedStyle]}>
+            <View style={styles.header}>
               <Text style={styles.title}>Filter Books</Text>
               <TouchableOpacity onPress={onClose}>
                 <Ionicons name="close" size={24} color="black" />
               </TouchableOpacity>
-            </Animated.View>
-          </PanGestureHandler>
-          <View style={styles.headerBorder} />
-          <View style={styles.contentContainer}>
-            <TextInput
-              placeholder="Name"
-              placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
-              value={name}
-              onChangeText={setName}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Status (Disabled)"
-              placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
-              value={status}
-              onChangeText={setStatus}
-              style={styles.input}
-              editable={false}
-            />
-            <View
-              style={[
-                styles.ratingContainer,
-                rating > 0 && styles.ratingApplied,
-              ]}
-            >
-              <Rating
-                type="star"
-                ratingColor={colors.primary}
-                ratingBackgroundColor="transparent"
-                ratingCount={5}
-                imageSize={24}
-                fractions={1}
-                jumpValue={0.5}
-                onFinishRating={setRating}
-                style={styles.rating}
+            </View>
+            <View style={styles.headerBorder} />
+            <View style={styles.contentContainer}>
+              <TextInput
+                placeholder="Name"
+                placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
+                value={name}
+                onChangeText={setName}
+                style={styles.input}
               />
-            </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.applyButton}
-                onPress={applyFilters}
+              <TextInput
+                placeholder="Status (Disabled)"
+                placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
+                value={status}
+                onChangeText={setStatus}
+                style={styles.input}
+                editable={false}
+              />
+              <View
+                style={[
+                  styles.ratingContainer,
+                  rating > 0 && styles.ratingApplied,
+                ]}
               >
-                <Text style={styles.applyButtonText}>Apply Filters</Text>
-              </TouchableOpacity>
-              {hasFilters && (
+                <Rating
+                  type="star"
+                  ratingColor={colors.primary}
+                  ratingBackgroundColor="transparent"
+                  ratingCount={5}
+                  imageSize={24}
+                  fractions={1}
+                  jumpValue={0.5}
+                  onFinishRating={setRating}
+                  style={styles.rating}
+                />
+              </View>
+              <View style={styles.buttonContainer}>
                 <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={clearFilters}
+                  style={styles.applyButton}
+                  onPress={applyFilters}
                 >
-                  <Text style={styles.clearButtonText}>Clear Filters</Text>
+                  <Text style={styles.applyButtonText}>Apply Filters</Text>
                 </TouchableOpacity>
-              )}
+                {hasFilters && (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={clearFilters}
+                  >
+                    <Text style={styles.clearButtonText}>Clear Filters</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-          </View>
-        </Animated.View>
-      </View>
+          </Animated.View>
+        </PanGestureHandler>
+      </Animated.View>
     </Modal>
   );
 };
@@ -149,7 +172,6 @@ const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
     height: "90%",
@@ -229,6 +251,9 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 18,
     fontWeight: "bold",
+  },
+  rating: {
+    paddingVertical: 5,
   },
 });
 

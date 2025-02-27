@@ -17,6 +17,10 @@
       "buildNumber": "11",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to let you select book cover images.",
+        "NSCameraUsageDescription": "This app needs access to your camera to let you take book cover photos."
       }
     },
     "splash": {
@@ -45,6 +49,15 @@
       "enabled": true,
       "fallbackToCacheTimeout": 0,
       "checkAutomatically": "ON_LOAD"
-    }
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos to let you select book cover images.",
+          "cameraPermission": "The app needs access to your camera to let you take book cover photos."
+        }
+      ]
+    ]
   }
 }
