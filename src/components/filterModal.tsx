@@ -19,6 +19,7 @@ import Animated, {
   withSpring,
   runOnJS,
 } from "react-native-reanimated";
+import { StarRating } from './StarRating';
 
 interface FilterModalProps {
   visible: boolean;
@@ -104,10 +105,22 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
 
   const hasFilters = status || rating || name;
 
+  const handleRatingChange = (value: number) => {
+    if (value === 0) {
+      setRating(0);
+    } else {
+      const roundedValue = Math.round(value * 2) / 2;
+      setRating(roundedValue);
+    }
+  };
+
   return (
     <Modal visible={visible} animationType="none" transparent>
       <Animated.View style={[styles.modalBackground, animatedBackgroundStyle]}>
-        <PanGestureHandler onGestureEvent={gestureHandler}>
+        <PanGestureHandler 
+          onGestureEvent={gestureHandler}
+          minDist={10}
+        >
           <Animated.View style={[styles.modalContainer, animatedStyle]}>
             <View style={styles.header}>
               <Text style={styles.title}>Filter Books</Text>
@@ -137,16 +150,16 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
                   rating > 0 && styles.ratingApplied,
                 ]}
               >
-                <Rating
-                  type="star"
-                  ratingColor={colors.primary}
-                  ratingBackgroundColor="transparent"
-                  ratingCount={5}
-                  imageSize={24}
-                  fractions={1}
-                  jumpValue={0.5}
-                  onFinishRating={setRating}
-                  style={styles.rating}
+                <View style={styles.ratingHeader}>
+                  <Text style={styles.ratingLabel}>Minimum Rating</Text>
+                  {rating > 0 && (
+                    <Text style={styles.ratingValue}>{rating.toFixed(1)}★</Text>
+                  )}
+                </View>
+                <StarRating
+                  rating={rating}
+                  onRatingChange={handleRatingChange}
+                  size={30}
                 />
               </View>
               <View style={styles.buttonContainer}>
@@ -221,13 +234,34 @@ const styles = StyleSheet.create({
     color: "black",
   },
   ratingContainer: {
-    paddingVertical: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
     marginBottom: 20,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
   },
   ratingApplied: {
     borderColor: colors.primary,
     borderWidth: 2,
-    borderRadius: 5,
+  },
+  ratingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  ratingLabel: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  ratingValue: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  rating: {
+    paddingVertical: 5,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -257,9 +291,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 18,
     fontWeight: "bold",
-  },
-  rating: {
-    paddingVertical: 5,
   },
 });
 

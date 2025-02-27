@@ -21,6 +21,7 @@ import { sizes } from "../constants/sizes";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { StarRating } from '../components/StarRating';
 
 type AddBookScreenRouteProp = RouteProp<
   {
@@ -200,19 +201,13 @@ export default function AddBookScreen({
               </View>
 
               {status === "Read" && (
-                <Rating
-                  type="star"
-                  ratingColor={colors.primary}
-                  ratingBackgroundColor="transparent"
-                  ratingCount={5}
-                  imageSize={sizes.fontSizeLarge * 1.5}
-                  fractions={2}
-                  jumpValue={0.5}
-                  startingValue={Math.round(rating * 2) / 2}
-                  onFinishRating={(value) => setRating(Math.round(value * 2) / 2)}
-                  style={styles.rating}
-                  
-                />
+                <View style={[styles.inputContainer, styles.ratingContainer]}>
+                  <StarRating
+                    rating={rating}
+                    onRatingChange={(value) => setRating(value)}
+                    size={sizes.fontSizeLarge * 1.3}
+                  />
+                </View>
               )}
             </View>
           </View>
@@ -437,10 +432,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: sizes.fontSizeSmall,
   },
-  rating: {
+  ratingContainer: {
     paddingVertical: 10,
-    marginBottom: 10,
-    backgroundColor: colors.background,
+    alignItems: 'center',
   },
   additionalFieldsButton: {
     flexDirection: 'row',
