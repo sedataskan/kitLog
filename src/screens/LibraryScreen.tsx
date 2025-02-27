@@ -68,8 +68,9 @@ export default function LibraryScreen() {
   const filteredBooks = books.filter((book) => {
     return (
       (!filters.name ||
-        book.title.toLowerCase().includes(filters.name.toLowerCase())) &&
-      (!filters.status || book.status === filters.status) &&
+        book.title.toLowerCase().includes(filters.name.toLowerCase()) ||
+        book.author.toLowerCase().includes(filters.name.toLowerCase())) &&
+      (!filters.status || book.status.toLowerCase() === filters.status.toLowerCase()) &&
       (!filters.rating || book.rating === filters.rating)
     );
   });
@@ -142,8 +143,6 @@ export default function LibraryScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
-    borderRadius: sizes.borderRadius,
   },
   contentContainer: {
     flexDirection: "row",

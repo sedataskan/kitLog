@@ -19,6 +19,9 @@ import { ScrollView } from "react-native-gesture-handler";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
+import { StarRating } from '../components/StarRating';
 
 type AddBookScreenRouteProp = RouteProp<
   {
@@ -45,6 +48,7 @@ export default function AddBookScreen({
   const [errorFields, setErrorFields] = useState<string[]>([]);
   const [status, setStatus] = useState("");
   const [isPickerVisible, setPickerVisible] = useState(false);
+  const [showAdditionalFields, setShowAdditionalFields] = useState(false);
 
   useEffect(() => {
     if (isEdit && book) {
@@ -62,8 +66,6 @@ export default function AddBookScreen({
   const handleSave = async () => {
     const missingFields = [];
     if (!title) missingFields.push("Title");
-    if (!author) missingFields.push("Author");
-    if (!pages) missingFields.push("Number of Pages");
     if (!status) missingFields.push("Status");
 
     if (missingFields.length > 0) {
@@ -111,9 +113,39 @@ export default function AddBookScreen({
       setImage("");
       setStatus("");
       onBookAdded(newBook);
-      navigation.navigate("BookPreview" as never, { book: newBook });
+      navigation.navigate('BookPreview', {
+        book: newBook
+      } as never);
     } catch (error) {
       console.error("Error saving book", error);
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (permissionResult.status !== 'granted') {
+        alert('Fotoğraflara erişim izni gerekli!');
+        return;
+      }
+
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [2, 3],
+        quality: 0.5,
+      });
+
+      if (!result.canceled) {
+        const selectedAsset = result.assets[0];
+        if (selectedAsset?.uri) {
+          setImage(selectedAsset.uri);
+        }
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      alert('Resim seçilirken bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -122,31 +154,26 @@ export default function AddBookScreen({
       <ScrollView contentContainerStyle={styles.scrollView}>
         <KeyboardAvoidingScrollView contentContainerStyle={styles.container}>
           <View style={styles.topSection}>
-            <Image
-              source={
-                image
-                  ? { uri: image }
-                  : require("../../assets/images/unknownBook.jpg")
-              }
-              style={styles.image}
-            />
-            <View style={styles.inputSection}>
-              <Rating
-                type="star"
-                ratingColor={colors.primary}
-                ratingBackgroundColor="transparent"
-                ratingCount={5}
-                imageSize={sizes.fontSizeLarge * 1.5}
-                fractions={1}
-                jumpValue={0.5}
-                startingValue={rating}
-                onFinishRating={setRating}
-                style={{
-                  paddingVertical: 10,
-                  marginBottom: 10,
-                  backgroundColor: colors.background,
-                }}
+            <TouchableOpacity 
+              onPress={pickImage} 
+              style={styles.imageContainer}
+              activeOpacity={0.7}
+            >
+              <Image
+                source={
+                  image
+                    ? { uri: image }
+                    : require("../../assets/images/unknownBook.jpg")
+                }
+                style={styles.image}
+                resizeMode="cover"
               />
+              <View style={styles.imageOverlay}>
+                <Text style={styles.imageOverlayText}>Tap to change image</Text>
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.inputSection}>
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>
                   Title <Text style={styles.mandatory}>*</Text>
@@ -160,100 +187,130 @@ export default function AddBookScreen({
                   onChangeText={setTitle}
                 />
               </View>
+
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Status</Text>
+                <Text style={styles.label}>Status <Text style={styles.mandatory}>*</Text></Text>
                 <TouchableOpacity
                   style={styles.dropdown}
                   onPress={() => setPickerVisible(true)}
                 >
-                  <Text
-                    style={[
-                      styles.dropdownText,
-                      errorFields.includes("Status") && styles.inputError,
-                    ]}
-                  >
+                  <Text style={styles.dropdownText}>
                     {status || "Select Status"}
                   </Text>
                 </TouchableOpacity>
-                <Modal
-                  visible={isPickerVisible}
-                  transparent={true}
-                  animationType="slide"
-                  onRequestClose={() => setPickerVisible(false)}
-                >
-                  <View style={styles.bottomPickerContainer}>
-                    <View style={styles.pickerHeader}>
-                      <Button
-                        title="Done"
-                        onPress={() => setPickerVisible(false)}
-                      />
-                    </View>
-                    <Picker
-                      selectedValue={status}
-                      onValueChange={(itemValue) => {
-                        setStatus(itemValue);
-                      }}
-                      style={styles.picker}
-                      itemStyle={styles.dropdownText}
-                    >
-                      <Picker.Item label="To Read" value="To Read" />
-                      <Picker.Item label="Read" value="Read" />
-                      <Picker.Item label="Reading" value="Reading" />
-                    </Picker>
-                  </View>
-                </Modal>
               </View>
+
+              {status === "Read" && (
+                <View style={[styles.inputContainer, styles.ratingContainer]}>
+                  <StarRating
+                    rating={rating}
+                    onRatingChange={(value) => setRating(value)}
+                    size={sizes.fontSizeLarge * 1.3}
+                  />
+                </View>
+              )}
             </View>
           </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>
-              Author <Text style={styles.mandatory}>*</Text>
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                errorFields.includes("Author") && styles.inputError,
-              ]}
-              value={author}
-              onChangeText={setAuthor}
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>
-              Number of Pages <Text style={styles.mandatory}>*</Text>
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                errorFields.includes("Number of Pages") && styles.inputError,
-              ]}
-              value={pages}
-              onChangeText={setPages}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Publication</Text>
-            <TextInput
-              style={styles.input}
-              value={publication}
-              onChangeText={setPublication}
-            />
-          </View>
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Review</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, styles.reviewInput]}
               value={review}
               onChangeText={setReview}
+              multiline
+              numberOfLines={4}
             />
           </View>
+
+          <TouchableOpacity 
+            style={styles.additionalFieldsButton}
+            onPress={() => setShowAdditionalFields(!showAdditionalFields)}
+          >
+            <Text style={styles.additionalFieldsText}>Additional Fields</Text>
+            <Ionicons 
+              name={showAdditionalFields ? "chevron-up" : "chevron-down"} 
+              size={24} 
+              color={colors.primary} 
+            />
+          </TouchableOpacity>
+
+          {showAdditionalFields && (
+            <>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Author
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    errorFields.includes("Author") && styles.inputError,
+                  ]}
+                  value={author}
+                  onChangeText={setAuthor}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>
+                  Number of Pages
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    errorFields.includes("Number of Pages") && styles.inputError,
+                  ]}
+                  value={pages}
+                  onChangeText={setPages}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Publication</Text>
+                <TextInput
+                  style={styles.input}
+                  value={publication}
+                  onChangeText={setPublication}
+                />
+              </View>
+            </>
+          )}
+
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.button}>
             <Button color={colors.primary} title="Save" onPress={handleSave} />
           </View>
         </KeyboardAvoidingScrollView>
       </ScrollView>
+
+      <Modal
+        visible={isPickerVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setPickerVisible(false)}
+      >
+        <View style={styles.bottomPickerContainer}>
+          <View style={styles.pickerHeader}>
+            <Button
+              title="Done"
+              onPress={() => setPickerVisible(false)}
+            />
+          </View>
+          <Picker
+            selectedValue={status}
+            onValueChange={(itemValue) => {
+              setStatus(itemValue);
+            }}
+            style={styles.picker}
+            itemStyle={styles.dropdownText}
+          >
+            <Picker.Item label="To Read" value="To Read" />
+            <Picker.Item label="Read" value="Read" />
+            <Picker.Item label="Reading" value="Reading" />
+          </Picker>
+        </View>
+      </Modal>
     </Layout>
   );
 }
@@ -301,8 +358,8 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   image: {
-    width: 120,
-    height: 180,
+    width: '100%',
+    height: '100%',
     borderRadius: sizes.borderRadius,
     backgroundColor: colors.backgroundSecondary,
   },
@@ -354,5 +411,48 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.primary,
     marginBottom: 10,
+  },
+  imageContainer: {
+    position: 'relative',
+    width: 120,
+    height: 180,
+    borderRadius: sizes.borderRadius,
+    overflow: 'hidden',
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 5,
+    alignItems: 'center',
+  },
+  imageOverlayText: {
+    color: 'white',
+    fontSize: sizes.fontSizeSmall,
+  },
+  ratingContainer: {
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  additionalFieldsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 5,
+    marginVertical: 10,
+    width: '100%',
+  },
+  additionalFieldsText: {
+    color: colors.primary,
+    fontSize: sizes.fontSizeMedium,
+    fontWeight: 'bold',
+  },
+  reviewInput: {
+    height: 100,
+    textAlignVertical: 'top',
   },
 });

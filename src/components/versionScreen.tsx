@@ -8,7 +8,7 @@ export default function VersionScreen() {
   const [clickCount, setClickCount] = useState(0);
   const [updateStatus, setUpdateStatus] = useState('');
 
-  const checkForUpdates = async () => {
+  const checkForUpdates = async (noDialog: boolean = false) => {
     try {
       setUpdateStatus('Güncellemeler kontrol ediliyor...');
       console.log('Update URL:', Updates.updateUrl);
@@ -37,12 +37,16 @@ export default function VersionScreen() {
         );
       } else {
         setUpdateStatus('Güncelleme bulunamadı');
-        Alert.alert("Bilgi", "Şu anda mevcut bir güncelleme bulunmuyor.");
+        if (!noDialog) {
+          Alert.alert("Bilgi", "Şu anda mevcut bir güncelleme bulunmuyor.");
+        }
       }
     } catch (error) {
       console.log('Güncelleme kontrol hatası:', error);
       setUpdateStatus('Hata: ' + error.message);
-      Alert.alert("Hata", "Güncelleme kontrol edilirken bir hata oluştu: " + error.message);
+      if (!noDialog) {
+        Alert.alert("Hata", "Güncelleme kontrol edilirken bir hata oluştu: " + error.message);
+      }
     }
   };
 
@@ -58,7 +62,7 @@ export default function VersionScreen() {
   };
 
   useEffect(() => {
-    checkForUpdates();
+    checkForUpdates(true);
   }, []);
 
   return (

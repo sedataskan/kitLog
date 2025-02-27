@@ -39,7 +39,7 @@ export const TopHeader = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.headerContainer}>
         {(isAddBookPage || isBookPreviewPage) && (
           <TouchableOpacity onPress={handleBackPress}>
@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    paddingBottom: 10,
   },
   headerContainer: {
     height: sizes.headerHeight,
@@ -112,7 +113,6 @@ const styles = StyleSheet.create({
   },
   rightComponent: {
     marginLeft: "auto",
-    paddingBottom: 4,
   },
   menuButton: {
     fontSize: sizes.fontSizeLarge,

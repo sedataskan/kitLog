@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  Button,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../constants/colors";
@@ -19,16 +20,38 @@ import Animated, {
   withSpring,
   runOnJS,
 } from "react-native-reanimated";
+import { StarRating } from './StarRating';
+import { Picker } from '@react-native-picker/picker';
 
-const FilterModal = ({ visible, onClose, onApplyFilters, filters }) => {
+interface FilterModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onApplyFilters: (filters: { status: string; rating: number; name: string }) => void;
+  filters: {
+    status: string;
+    rating: number;
+    name: string;
+  };
+}
+
+const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalProps) => {
   const [status, setStatus] = useState("");
   const [rating, setRating] = useState(0);
   const [name, setName] = useState("");
-  const translateY = useSharedValue(0);
+  const translateY = useSharedValue(1000);
+  const backgroundOpacity = useSharedValue(0);
+  const [isPickerVisible, setPickerVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
-      translateY.value = withSpring(0);
+      translateY.value = withSpring(0, {
+        damping: 20,
+        stiffness: 90,
+      });
+      backgroundOpacity.value = withSpring(1);
+    } else {
+      translateY.value = 1000;
+      backgroundOpacity.value = 0;
     }
   }, [visible]);
 
@@ -46,18 +69,28 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }) => {
     },
     onActive: (event, ctx) => {
       translateY.value = ctx.startY + event.translationY;
+      const opacity = Math.max(0, 1 - event.translationY / 400);
+      backgroundOpacity.value = opacity;
     },
     onEnd: (event) => {
       if (event.translationY > 100) {
-        runOnJS(onClose)();
+        translateY.value = withSpring(1000, {}, () => {
+          runOnJS(onClose)();
+        });
+        backgroundOpacity.value = withSpring(0);
       } else {
         translateY.value = withSpring(0);
+        backgroundOpacity.value = withSpring(1);
       }
     },
   });
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
+  }));
+
+  const animatedBackgroundStyle = useAnimatedStyle(() => ({
+    backgroundColor: `rgba(0, 0, 0, ${backgroundOpacity.value * 0.5})`,
   }));
 
   const applyFilters = () => {
@@ -75,72 +108,118 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }) => {
 
   const hasFilters = status || rating || name;
 
+  const handleRatingChange = (value: number) => {
+    if (value === 0) {
+      setRating(0);
+    } else {
+      const roundedValue = Math.round(value * 2) / 2;
+      setRating(roundedValue);
+    }
+  };
+
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.modalBackground}>
-        <Animated.View style={[styles.modalContainer, animatedStyle]}>
-          <PanGestureHandler onGestureEvent={gestureHandler}>
-            <Animated.View style={styles.header}>
+    <Modal visible={visible} animationType="none" transparent>
+      <Animated.View style={[styles.modalBackground, animatedBackgroundStyle]}>
+        <PanGestureHandler onGestureEvent={gestureHandler} minDist={10}>
+          <Animated.View style={[styles.modalContainer, animatedStyle]}>
+            <View style={styles.header}>
               <Text style={styles.title}>Filter Books</Text>
               <TouchableOpacity onPress={onClose}>
                 <Ionicons name="close" size={24} color="black" />
               </TouchableOpacity>
-            </Animated.View>
-          </PanGestureHandler>
-          <View style={styles.headerBorder} />
-          <View style={styles.contentContainer}>
-            <TextInput
-              placeholder="Name"
-              placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
-              value={name}
-              onChangeText={setName}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Status (Disabled)"
-              placeholderTextColor={Platform.OS === "ios" ? "gray" : undefined}
-              value={status}
-              onChangeText={setStatus}
-              style={styles.input}
-              editable={false}
-            />
-            <View
-              style={[
-                styles.ratingContainer,
-                rating > 0 && styles.ratingApplied,
-              ]}
-            >
-              <Rating
-                type="star"
-                ratingColor={colors.primary}
-                ratingBackgroundColor="transparent"
-                ratingCount={5}
-                imageSize={24}
-                fractions={1}
-                jumpValue={0.5}
-                onFinishRating={setRating}
-                style={styles.rating}
-              />
             </View>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.applyButton}
-                onPress={applyFilters}
-              >
-                <Text style={styles.applyButtonText}>Apply Filters</Text>
-              </TouchableOpacity>
-              {hasFilters && (
+            <View style={styles.contentContainer}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Name</Text>
+                <TextInput
+                  placeholder="Enter name"
+                  placeholderTextColor={colors.textSecondary}
+                  value={name}
+                  onChangeText={setName}
+                  style={styles.input}
+                />
+              </View>
+              
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Status</Text>
                 <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={clearFilters}
+                  style={styles.input}
+                  onPress={() => setPickerVisible(true)}
                 >
-                  <Text style={styles.clearButtonText}>Clear Filters</Text>
+                  <Text style={[
+                    styles.dropdownText,
+                    !status && styles.placeholderText
+                  ]}>
+                    {status || "Select Status"}
+                  </Text>
                 </TouchableOpacity>
-              )}
+              </View>
+
+              <View style={[styles.ratingContainer, rating > 0 && styles.ratingApplied]}>
+                <View style={styles.ratingHeader}>
+                  <Text style={styles.ratingLabel}>Minimum Rating</Text>
+                  {rating > 0 && (
+                    <Text style={styles.ratingValue}>{rating.toFixed(1)}★</Text>
+                  )}
+                </View>
+                <StarRating
+                  rating={rating}
+                  onRatingChange={handleRatingChange}
+                  size={30}
+                />
+              </View>
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.applyButton}
+                  onPress={applyFilters}
+                >
+                  <Text style={styles.applyButtonText}>Apply Filters</Text>
+                </TouchableOpacity>
+                {hasFilters && (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={clearFilters}
+                  >
+                    <Text style={styles.clearButtonText}>Clear Filters</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
+          </Animated.View>
+        </PanGestureHandler>
+      </Animated.View>
+
+      <Modal
+        visible={isPickerVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setPickerVisible(false)}
+      >
+        <View style={styles.bottomPickerContainer}>
+          <View style={styles.pickerHeader}>
+            <Button
+              title="Done"
+              onPress={() => setPickerVisible(false)}
+            />
           </View>
-        </Animated.View>
-      </View>
+          <Picker
+            selectedValue={status}
+            onValueChange={(itemValue) => {
+              setStatus(itemValue);
+              if (Platform.OS === 'android') {
+                setPickerVisible(false);
+              }
+            }}
+            style={styles.picker}
+          >
+            <Picker.Item label="All Status" value="" />
+            <Picker.Item label="To Read" value="To Read" />
+            <Picker.Item label="Read" value="Read" />
+            <Picker.Item label="Reading" value="Reading" />
+          </Picker>
+        </View>
+      </Modal>
     </Modal>
   );
 };
@@ -149,13 +228,13 @@ const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
     height: "90%",
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    transform: [{ translateY: 0 }],
   },
   header: {
     flexDirection: "row",
@@ -165,12 +244,12 @@ const styles = StyleSheet.create({
     paddingRight: 15,
     paddingLeft: 15,
     paddingTop: 15,
-    paddingBottom: 5,
+    paddingBottom: 15,
   },
   contentContainer: {
-    paddingRight: 20,
-    paddingLeft: 20,
+    paddingHorizontal: 20,
     paddingTop: 5,
+    gap: 24,
   },
   title: {
     fontSize: 24,
@@ -183,23 +262,60 @@ const styles = StyleSheet.create({
     opacity: 0.5,
     marginBottom: 20,
   },
+  inputContainer: {
+    width: "100%",
+  },
+  label: {
+    marginBottom: 8,
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: "500",
+  },
   input: {
-    height: 40,
-    borderColor: "gray",
+    width: "100%",
+    height: 48,
+    borderColor: colors.secondary,
     borderWidth: 1,
-    marginBottom: 20,
-    paddingHorizontal: 10,
     borderRadius: 5,
-    color: "black",
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    backgroundColor: "white",
+  },
+  dropdownText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+  },
+  placeholderText: {
+    color: colors.textSecondary,
   },
   ratingContainer: {
-    paddingVertical: 10,
-    marginBottom: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
   },
   ratingApplied: {
     borderColor: colors.primary,
     borderWidth: 2,
-    borderRadius: 5,
+  },
+  ratingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  ratingLabel: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  ratingValue: {
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: 'bold',
+  },
+  rating: {
+    paddingVertical: 5,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -229,6 +345,25 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 18,
     fontWeight: "bold",
+  },
+  bottomPickerContainer: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.secondary,
+  },
+  picker: {
+    width: "100%",
+    backgroundColor: colors.background,
   },
 });
 
