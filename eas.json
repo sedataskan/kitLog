@@ -12,13 +12,15 @@
       "distribution": "internal",
       "ios": {
         "resourceClass": "m1-medium"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
-      "distribution": "internal",
+      "distribution": "store",
       "ios": {
-        "resourceClass": "m1-medium"
-      }
+        "buildConfiguration": "Release"
+      },
+      "channel": "production"
     }
   },
   "submit": {

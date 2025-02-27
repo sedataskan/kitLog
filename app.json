@@ -2,9 +2,11 @@
   "expo": {
     "name": "kitApp",
     "slug": "kitapp",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "owner": "osntus",
-    "runtimeVersion": "1.0.6",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/KITAPP.png",
     "userInterfaceStyle": "automatic",
@@ -12,6 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ombayus.kitApp",
+      "buildNumber": "11",
       "config": {
         "usesNonExemptEncryption": false
       }
