@@ -105,6 +105,19 @@ export default function HomeMainScreen() {
 
   const addToLibrary = async (book: Book) => {
     try {
+      const existingBooks = await AsyncStorage.getItem("books");
+      const books = existingBooks ? JSON.parse(existingBooks) : [];
+      
+      // Check if book already exists
+      const bookExists = books.some((existingBook: any) => 
+        existingBook.title.toLowerCase() === book.volumeInfo.title.toLowerCase()
+      );
+
+      if (bookExists) {
+        alert("This book is already in your library!");
+        return;
+      }
+
       const newBook = {
         title: book.volumeInfo.title,
         author: book.volumeInfo.authors?.[0] || "Unknown Author",
@@ -117,8 +130,6 @@ export default function HomeMainScreen() {
         saveDate: new Date(),
       };
 
-      const existingBooks = await AsyncStorage.getItem("books");
-      const books = existingBooks ? JSON.parse(existingBooks) : [];
       books.push(newBook);
       await AsyncStorage.setItem("books", JSON.stringify(books));
 

@@ -27,12 +27,12 @@ type BookPreviewScreenRouteProp = RouteProp<
 >;
 
 const getStatusStyle = (status: string) => {
-  switch (status) {
-    case "Read":
+  switch (status.toLowerCase()) {
+    case "read":
       return styles.statusRead;
-    case "Reading":
+    case "reading":
       return styles.statusReading;
-    case "To Read":
+    case "to read":
       return styles.statusToRead;
     default:
       return styles.statusToRead;
@@ -126,14 +126,15 @@ export default function BookPreviewScreen() {
         <Text style={[styles.status, getStatusStyle(parsedBook.status)]}>
           {parsedBook.status}
         </Text>
-        <View style={styles.ratingContainer}>
-          <StarRating
-            rating={parsedBook.rating}
-            onRatingChange={() => {}}
-            size={sizes.fontSizeLarge * 1.2}
-            readonly
-          />
-        </View>
+        {parsedBook.status.toLowerCase() === 'read' && (
+          <View style={styles.ratingContainer}>
+            <StarRating
+              rating={parsedBook.rating}
+              onRatingChange={() => {}}
+              size={sizes.fontSizeLarge * 1.2}
+            />
+          </View>
+        )}
         <View style={styles.textContainer}>
           <View style={styles.detailsSection}>
             <Text style={styles.label}>Pages</Text>
@@ -213,15 +214,15 @@ const styles = StyleSheet.create({
     fontSize: sizes.fontSizeSmall,
   },
   statusRead: {
-    backgroundColor: "green",
+    backgroundColor: '#4CAF50',
     color: "white",
   },
   statusReading: {
-    backgroundColor: "orange",
+    backgroundColor: '#2196F3',
     color: "white",
   },
   statusToRead: {
-    backgroundColor: "blue",
+    backgroundColor: '#FF9800',
     color: "white",
   },
   errorText: {
