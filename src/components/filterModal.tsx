@@ -38,20 +38,19 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
   const [status, setStatus] = useState("");
   const [rating, setRating] = useState(0);
   const [name, setName] = useState("");
+  const [isClosing, setIsClosing] = useState(false);
   const translateY = useSharedValue(1000);
   const backgroundOpacity = useSharedValue(0);
   const [isPickerVisible, setPickerVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
+      setIsClosing(false);
       translateY.value = withSpring(0, {
         damping: 20,
         stiffness: 90,
       });
       backgroundOpacity.value = withSpring(1);
-    } else {
-      translateY.value = 1000;
-      backgroundOpacity.value = 0;
     }
   }, [visible]);
 
@@ -63,21 +62,33 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
     }
   }, [visible]);
 
+  const closeModal = () => {
+    setIsClosing(true);
+    translateY.value = withSpring(1000, {
+      damping: 20,
+      stiffness: 90,
+      restSpeedThreshold: 100,
+      restDisplacementThreshold: 100,
+    }, () => {
+      runOnJS(onClose)();
+    });
+    backgroundOpacity.value = withSpring(0);
+  };
+
   const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx) => {
+    onStart: (_, ctx: { startY: number }) => {
       ctx.startY = translateY.value;
     },
-    onActive: (event, ctx) => {
-      translateY.value = ctx.startY + event.translationY;
-      const opacity = Math.max(0, 1 - event.translationY / 400);
-      backgroundOpacity.value = opacity;
+    onActive: (event, ctx: { startY: number }) => {
+      if (!isClosing) {
+        translateY.value = ctx.startY + event.translationY;
+        const opacity = Math.max(0, 1 - event.translationY / 400);
+        backgroundOpacity.value = opacity;
+      }
     },
     onEnd: (event) => {
       if (event.translationY > 100) {
-        translateY.value = withSpring(1000, {}, () => {
-          runOnJS(onClose)();
-        });
-        backgroundOpacity.value = withSpring(0);
+        runOnJS(closeModal)();
       } else {
         translateY.value = withSpring(0);
         backgroundOpacity.value = withSpring(1);
@@ -95,7 +106,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
 
   const applyFilters = () => {
     onApplyFilters({ status, rating, name });
-    onClose();
+    closeModal();
   };
 
   const clearFilters = () => {
@@ -103,7 +114,7 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
     setRating(0);
     setName("");
     onApplyFilters({ status: "", rating: 0, name: "" });
-    onClose();
+    closeModal();
   };
 
   const hasFilters = status || rating || name;
@@ -118,13 +129,24 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
   };
 
   return (
-    <Modal visible={visible} animationType="none" transparent>
-      <Animated.View style={[styles.modalBackground, animatedBackgroundStyle]}>
-        <PanGestureHandler onGestureEvent={gestureHandler} minDist={10}>
+    <Modal 
+      visible={visible} 
+      animationType="none" 
+      transparent
+      onRequestClose={closeModal}
+    >
+      <Animated.View 
+        style={[
+          styles.modalBackground, 
+          animatedBackgroundStyle,
+          { pointerEvents: isClosing ? 'none' : 'auto' }
+        ]}
+      >
+        <PanGestureHandler onGestureEvent={gestureHandler} minDist={10} enabled={!isClosing}>
           <Animated.View style={[styles.modalContainer, animatedStyle]}>
             <View style={styles.header}>
               <Text style={styles.title}>Filter Books</Text>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={closeModal}>
                 <Ionicons name="close" size={24} color="black" />
               </TouchableOpacity>
             </View>

@@ -189,7 +189,10 @@ export default function HomeMainScreen() {
       ) : (
         Object.entries(recommendedBooks).map(([category, categoryBooks]) => (
           <View key={category} style={styles.categorySection}>
-            <Text style={styles.categoryTitle}>{category}</Text>
+            <View style={styles.categoryTitle}>
+              <Ionicons name="book" size={22} color={colors.primary} />
+              <Text style={styles.categoryTitleText}>{category}</Text>
+            </View>
             <FlatList
               horizontal
               data={categoryBooks}
@@ -296,14 +299,14 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 80,
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 100,
+    paddingBottom: 50,
   },
   bottomSpacing: {
-    height: 50,
+    height: 0,
   },
   bookItem: {
     flexDirection: "row",
@@ -355,10 +358,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   categoryTitle: {
-    fontSize: sizes.fontSizeLarge,
-    fontWeight: "bold",
-    color: colors.textPrimary,
-    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+    opacity: 0.9,
+  },
+  categoryTitleText: {
+    fontSize: sizes.fontSizeMedium,
+    letterSpacing: 0.3,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    marginLeft: 6,
+    textTransform: 'uppercase',
   },
   recommendedListContainer: {
     paddingRight: 16,

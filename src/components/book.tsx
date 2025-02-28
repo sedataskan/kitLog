@@ -62,6 +62,7 @@ export const Book = ({
   review,
   rating,
   status,
+  style,
 }: {
   title: string;
   author: string;
@@ -71,6 +72,7 @@ export const Book = ({
   review: string;
   rating: number;
   status: string;
+  style?: object;
 }) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
   const statusColor = getStatusColor(status);
@@ -98,7 +100,7 @@ export const Book = ({
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.container}>
+    <TouchableOpacity onPress={handlePress} style={[styles.container, style]}>
       <View style={styles.imageContainer}>
         <View style={styles.statusBadge}>
           <Ionicons name={statusIcon} size={12} color={statusColor} />

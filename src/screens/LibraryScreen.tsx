@@ -108,8 +108,8 @@ export default function LibraryScreen() {
         </TouchableOpacity>
       }
       menuVisible={false}
-      setMenuVisible={() => {}}
-      handleEdit={() => {}}
+      setMenuVisible={() => { }}
+      handleEdit={() => { }}
     >
       <AddButton
         onPress={() =>
@@ -131,8 +131,8 @@ export default function LibraryScreen() {
               <Ionicons name="book" size={22} color={colors.primary} />
               <Text style={styles.sectionTitleText}>Currently Reading</Text>
             </View>
-            <ScrollView 
-              horizontal 
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.currentlyReadingList}
             >
@@ -175,7 +175,7 @@ export default function LibraryScreen() {
                   rating={book.rating}
                   status={book.status}
                 />
-            ))}
+              ))}
           </View>
         </View>
       </ScrollView>
@@ -192,9 +192,9 @@ const styles = StyleSheet.create({
   booksGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
     paddingBottom: 100,
     paddingTop: 5,
+    columnGap: 15,
   },
   filterButton: {
     backgroundColor: colors.primary,
