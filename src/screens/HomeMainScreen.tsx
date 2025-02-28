@@ -73,6 +73,7 @@ export default function HomeMainScreen() {
       }
       
       setRecommendedBooks(recommendedResults);
+      console.log(recommendedResults);
     } catch (error) {
       console.error("Error fetching recommended books:", error);
     } finally {
@@ -104,6 +105,19 @@ export default function HomeMainScreen() {
 
   const addToLibrary = async (book: Book) => {
     try {
+      const existingBooks = await AsyncStorage.getItem("books");
+      const books = existingBooks ? JSON.parse(existingBooks) : [];
+      
+      // Check if book already exists
+      const bookExists = books.some((existingBook: any) => 
+        existingBook.title.toLowerCase() === book.volumeInfo.title.toLowerCase()
+      );
+
+      if (bookExists) {
+        alert("This book is already in your library!");
+        return;
+      }
+
       const newBook = {
         title: book.volumeInfo.title,
         author: book.volumeInfo.authors?.[0] || "Unknown Author",
@@ -116,8 +130,6 @@ export default function HomeMainScreen() {
         saveDate: new Date(),
       };
 
-      const existingBooks = await AsyncStorage.getItem("books");
-      const books = existingBooks ? JSON.parse(existingBooks) : [];
       books.push(newBook);
       await AsyncStorage.setItem("books", JSON.stringify(books));
 
@@ -132,15 +144,21 @@ export default function HomeMainScreen() {
     navigation.navigate('BookDetail', { book } as never);
   };
 
+  const getSecureImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    // Convert http to https and handle zoom parameter
+    return url.replace('http://', 'https://').replace('&edge=curl', '');
+  };
+
   const renderBookItem = ({ item }: { item: Book }) => (
     <TouchableOpacity onPress={() => navigateToBookDetail(item)}>
       <View style={styles.bookItem}>
         <Image
           source={{
-            uri: item.volumeInfo.imageLinks?.thumbnail || 
-                 'https://via.placeholder.com/128x192?text=No+Cover',
+            uri: getSecureImageUrl(item.volumeInfo.imageLinks?.thumbnail),
           }}
           style={styles.bookCover}
+          resizeMode="cover"
         />
         <View style={styles.bookInfo}>
           <Text style={styles.bookTitle} numberOfLines={2}>
@@ -171,7 +189,10 @@ export default function HomeMainScreen() {
       ) : (
         Object.entries(recommendedBooks).map(([category, categoryBooks]) => (
           <View key={category} style={styles.categorySection}>
-            <Text style={styles.categoryTitle}>{category}</Text>
+            <View style={styles.categoryTitle}>
+              <Ionicons name="book" size={22} color={colors.primary} />
+              <Text style={styles.categoryTitleText}>{category}</Text>
+            </View>
             <FlatList
               horizontal
               data={categoryBooks}
@@ -182,10 +203,10 @@ export default function HomeMainScreen() {
                 >
                   <Image
                     source={{
-                      uri: item.volumeInfo.imageLinks?.thumbnail || 
-                           'https://via.placeholder.com/128x192?text=No+Cover',
+                      uri: getSecureImageUrl(item.volumeInfo.imageLinks?.thumbnail),
                     }}
                     style={styles.recommendedBookCover}
+                    resizeMode="cover"
                   />
                   <Text style={styles.recommendedBookTitle} numberOfLines={2}>
                     {item.volumeInfo.title}
@@ -278,14 +299,14 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 80,
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: 100,
+    paddingBottom: 50,
   },
   bottomSpacing: {
-    height: 50,
+    height: 0,
   },
   bookItem: {
     flexDirection: "row",
@@ -337,10 +358,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   categoryTitle: {
-    fontSize: sizes.fontSizeLarge,
-    fontWeight: "bold",
-    color: colors.textPrimary,
-    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+    opacity: 0.9,
+  },
+  categoryTitleText: {
+    fontSize: sizes.fontSizeMedium,
+    letterSpacing: 0.3,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    marginLeft: 6,
+    textTransform: 'uppercase',
   },
   recommendedListContainer: {
     paddingRight: 16,

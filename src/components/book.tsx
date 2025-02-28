@@ -4,6 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
+import { Ionicons } from "@expo/vector-icons";
 
 type RootStackParamList = {
   BookPreview: {
@@ -26,6 +27,32 @@ type BookScreenNavigationProp = StackNavigationProp<
   "BookPreview"
 >;
 
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'read':
+      return '#4CAF50';
+    case 'to read':
+      return '#FF9800';
+    case 'reading':
+      return '#2196F3';
+    default:
+      return colors.textSecondary;
+  }
+};
+
+const getStatusIcon = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'read':
+      return 'checkmark-circle';
+    case 'to read':
+      return 'time';
+    case 'reading':
+      return 'book';
+    default:
+      return 'help-circle';
+  }
+};
+
 export const Book = ({
   title,
   author,
@@ -35,6 +62,7 @@ export const Book = ({
   review,
   rating,
   status,
+  style,
 }: {
   title: string;
   author: string;
@@ -44,58 +72,92 @@ export const Book = ({
   review: string;
   rating: number;
   status: string;
+  style?: object;
 }) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
+  const statusColor = getStatusColor(status);
+  const statusIcon = getStatusIcon(status);
+
+  const getSecureImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    return url.replace('http://', 'https://').replace('&edge=curl', '');
+  };
 
   const handlePress = () => {
     navigation.navigate("BookPreview", {
       book: {
         title,
         author,
-        image,
+        image: getSecureImageUrl(image),
         pages,
         publication,
         review,
         rating,
         saveDate: new Date(),
-        status: status || "To Read",
+        status,
       },
     });
   };
 
   return (
-    <TouchableOpacity onPress={handlePress}>
-      <View style={styles.container}>
-        <View style={styles.imageContainer}>
-          <Image
-            source={
-              image
-                ? { uri: image }
-                : require("../../assets/images/unknownBook.jpg")
-            }
-            style={styles.image}
-          />
+    <TouchableOpacity onPress={handlePress} style={[styles.container, style]}>
+      <View style={styles.imageContainer}>
+        <View style={styles.statusBadge}>
+          <Ionicons name={statusIcon} size={12} color={statusColor} />
         </View>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.author}>{author}</Text>
+        <Image
+          source={
+            image
+              ? { uri: getSecureImageUrl(image) }
+              : require("../../assets/images/unknownBook.jpg")
+          }
+          style={styles.image}
+        />
       </View>
+      <Text style={styles.title} numberOfLines={2}>
+        {title}
+      </Text>
+      <Text style={styles.author} numberOfLines={1}>
+        {author}
+      </Text>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    margin: 15,
-    borderRadius: sizes.borderRadius,
+    width: 105,
+    marginBottom: 25,
+    marginHorizontal: 0,
   },
   imageContainer: {
-    width: 120,
-    height: 180,
+    width: 105,
+    height: 155,
     borderRadius: sizes.borderRadius,
     backgroundColor: colors.secondary,
     justifyContent: "center",
     alignItems: "center",
+    position: 'relative',
+  },
+  statusBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
   },
   image: {
     width: "100%",
@@ -106,15 +168,13 @@ const styles = StyleSheet.create({
     fontSize: sizes.fontSizeMedium,
     fontWeight: "bold",
     color: colors.textPrimary,
-    textAlign: "center",
-    overflow: "hidden",
-    maxWidth: 110,
+    marginTop: 8,
+    marginBottom: 4,
+    maxWidth: 105,
   },
   author: {
     fontSize: sizes.fontSizeSmall,
     color: colors.textSecondary,
-    textAlign: "center",
-    overflow: "hidden",
-    maxWidth: 110,
+    maxWidth: 105,
   },
 });

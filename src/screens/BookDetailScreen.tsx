@@ -30,12 +30,30 @@ export default function BookDetailScreen({ route }: { route: BookDetailScreenRou
   const { book } = route.params;
   const navigation = useNavigation();
 
+  const getSecureImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    return url.replace('http://', 'https://').replace('&edge=curl', '');
+  };
+
   const addToLibrary = async () => {
     try {
+      const existingBooks = await AsyncStorage.getItem("books");
+      const books = existingBooks ? JSON.parse(existingBooks) : [];
+      
+      // Check if book already exists
+      const bookExists = books.some((existingBook: any) => 
+        existingBook.title.toLowerCase() === book.volumeInfo.title.toLowerCase()
+      );
+
+      if (bookExists) {
+        alert("This book is already in your library!");
+        return;
+      }
+
       const newBook = {
         title: book.volumeInfo.title,
         author: book.volumeInfo.authors?.[0] || "Unknown Author",
-        image: book.volumeInfo.imageLinks?.thumbnail || "",
+        image: getSecureImageUrl(book.volumeInfo.imageLinks?.thumbnail),
         pages: book.volumeInfo.pageCount?.toString() || "0",
         publication: book.volumeInfo.publisher || "Unknown Publisher",
         review: "",
@@ -44,8 +62,6 @@ export default function BookDetailScreen({ route }: { route: BookDetailScreenRou
         saveDate: new Date(),
       };
 
-      const existingBooks = await AsyncStorage.getItem("books");
-      const books = existingBooks ? JSON.parse(existingBooks) : [];
       books.push(newBook);
       await AsyncStorage.setItem("books", JSON.stringify(books));
 
@@ -86,8 +102,7 @@ export default function BookDetailScreen({ route }: { route: BookDetailScreenRou
         <View style={styles.header}>
           <Image
             source={{
-              uri: book.volumeInfo.imageLinks?.thumbnail || 
-                   'https://via.placeholder.com/128x192?text=No+Cover',
+              uri: getSecureImageUrl(book.volumeInfo.imageLinks?.thumbnail),
             }}
             style={styles.coverImage}
           />

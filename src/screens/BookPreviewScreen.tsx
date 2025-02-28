@@ -27,12 +27,12 @@ type BookPreviewScreenRouteProp = RouteProp<
 >;
 
 const getStatusStyle = (status: string) => {
-  switch (status) {
-    case "Read":
+  switch (status.toLowerCase()) {
+    case "read":
       return styles.statusRead;
-    case "Reading":
+    case "reading":
       return styles.statusReading;
-    case "To Read":
+    case "to read":
       return styles.statusToRead;
     default:
       return styles.statusToRead;
@@ -44,6 +44,11 @@ export default function BookPreviewScreen() {
   const navigation = useNavigation();
   const { book } = route.params;
   const [menuVisible, setMenuVisible] = useState(false);
+
+  const getSecureImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    return url.replace('http://', 'https://').replace('&edge=curl', '');
+  };
 
   if (!book) {
     return (
@@ -106,7 +111,7 @@ export default function BookPreviewScreen() {
         <Image
           source={
             parsedBook.image
-              ? { uri: parsedBook.image }
+              ? { uri: getSecureImageUrl(parsedBook.image) }
               : require("../../assets/images/unknownBook.jpg")
           }
           style={styles.image}
@@ -121,14 +126,15 @@ export default function BookPreviewScreen() {
         <Text style={[styles.status, getStatusStyle(parsedBook.status)]}>
           {parsedBook.status}
         </Text>
-        <View style={styles.ratingContainer}>
-          <StarRating
-            rating={parsedBook.rating}
-            onRatingChange={() => {}}
-            size={sizes.fontSizeLarge * 1.2}
-            readonly
-          />
-        </View>
+        {parsedBook.status.toLowerCase() === 'read' && (
+          <View style={styles.ratingContainer}>
+            <StarRating
+              rating={parsedBook.rating}
+              onRatingChange={() => {}}
+              size={sizes.fontSizeLarge * 1.2}
+            />
+          </View>
+        )}
         <View style={styles.textContainer}>
           <View style={styles.detailsSection}>
             <Text style={styles.label}>Pages</Text>
@@ -208,15 +214,15 @@ const styles = StyleSheet.create({
     fontSize: sizes.fontSizeSmall,
   },
   statusRead: {
-    backgroundColor: "green",
+    backgroundColor: '#4CAF50',
     color: "white",
   },
   statusReading: {
-    backgroundColor: "orange",
+    backgroundColor: '#2196F3',
     color: "white",
   },
   statusToRead: {
-    backgroundColor: "blue",
+    backgroundColor: '#FF9800',
     color: "white",
   },
   errorText: {
