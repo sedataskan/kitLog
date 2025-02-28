@@ -18,9 +18,11 @@
     "production": {
       "distribution": "store",
       "ios": {
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "resourceClass": "m1-medium"
       },
-      "channel": "production"
+      "channel": "production",
+      "autoIncrement": true
     }
   },
   "submit": {
