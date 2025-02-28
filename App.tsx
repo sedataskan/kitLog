@@ -3,6 +3,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import AddBookScreen from "./src/screens/AddBookScreen";
 import Navbar from "./src/components/navbar";
 import BookPreviewScreen from "./src/screens/BookPreviewScreen";
+import BookDetailScreen from "./src/screens/BookDetailScreen";
 import React from "react";
 
 const Stack = createStackNavigator();
@@ -24,6 +25,11 @@ export default function App() {
         <Stack.Screen
           name="BookPreview"
           component={BookPreviewScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BookDetail"
+          component={BookDetailScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

@@ -11,6 +11,7 @@ export function Layout({
   setMenuVisible,
   handleEdit,
   handleDelete,
+  canGoBack = false,
 }: any) {
   return (
     <View style={styles.container}>
@@ -21,6 +22,7 @@ export function Layout({
         setMenuVisible={setMenuVisible}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
+        canGoBack={canGoBack}
       />
       {children}
     </View>
