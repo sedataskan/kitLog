@@ -73,6 +73,7 @@ export default function HomeMainScreen() {
       }
       
       setRecommendedBooks(recommendedResults);
+      console.log(recommendedResults);
     } catch (error) {
       console.error("Error fetching recommended books:", error);
     } finally {
@@ -132,15 +133,21 @@ export default function HomeMainScreen() {
     navigation.navigate('BookDetail', { book } as never);
   };
 
+  const getSecureImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    // Convert http to https and handle zoom parameter
+    return url.replace('http://', 'https://').replace('&edge=curl', '');
+  };
+
   const renderBookItem = ({ item }: { item: Book }) => (
     <TouchableOpacity onPress={() => navigateToBookDetail(item)}>
       <View style={styles.bookItem}>
         <Image
           source={{
-            uri: item.volumeInfo.imageLinks?.thumbnail || 
-                 'https://via.placeholder.com/128x192?text=No+Cover',
+            uri: getSecureImageUrl(item.volumeInfo.imageLinks?.thumbnail),
           }}
           style={styles.bookCover}
+          resizeMode="cover"
         />
         <View style={styles.bookInfo}>
           <Text style={styles.bookTitle} numberOfLines={2}>
@@ -182,10 +189,10 @@ export default function HomeMainScreen() {
                 >
                   <Image
                     source={{
-                      uri: item.volumeInfo.imageLinks?.thumbnail || 
-                           'https://via.placeholder.com/128x192?text=No+Cover',
+                      uri: getSecureImageUrl(item.volumeInfo.imageLinks?.thumbnail),
                     }}
                     style={styles.recommendedBookCover}
+                    resizeMode="cover"
                   />
                   <Text style={styles.recommendedBookTitle} numberOfLines={2}>
                     {item.volumeInfo.title}

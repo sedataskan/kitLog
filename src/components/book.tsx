@@ -47,12 +47,17 @@ export const Book = ({
 }) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
 
+  const getSecureImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    return url.replace('http://', 'https://').replace('&edge=curl', '');
+  };
+
   const handlePress = () => {
     navigation.navigate("BookPreview", {
       book: {
         title,
         author,
-        image,
+        image: getSecureImageUrl(image),
         pages,
         publication,
         review,
@@ -70,7 +75,7 @@ export const Book = ({
           <Image
             source={
               image
-                ? { uri: image }
+                ? { uri: getSecureImageUrl(image) }
                 : require("../../assets/images/unknownBook.jpg")
             }
             style={styles.image}

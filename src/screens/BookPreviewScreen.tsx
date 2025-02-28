@@ -45,6 +45,11 @@ export default function BookPreviewScreen() {
   const { book } = route.params;
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const getSecureImageUrl = (url: string | undefined) => {
+    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    return url.replace('http://', 'https://').replace('&edge=curl', '');
+  };
+
   if (!book) {
     return (
       <Layout title="Book Preview">
@@ -106,7 +111,7 @@ export default function BookPreviewScreen() {
         <Image
           source={
             parsedBook.image
-              ? { uri: parsedBook.image }
+              ? { uri: getSecureImageUrl(parsedBook.image) }
               : require("../../assets/images/unknownBook.jpg")
           }
           style={styles.image}
