@@ -7,4 +7,5 @@ export const colors = {
   backgroundSecondary: "#F5F5F5",
   error: "maroon",
   black: "#000",
+  white: "#FFFFFF",
 };
