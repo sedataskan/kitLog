@@ -95,6 +95,7 @@ export default function BookPreviewScreen() {
 
   return (
     <Layout
+      canGoBack={true}
       title={parsedBook.title}
       menuVisible={menuVisible}
       setMenuVisible={setMenuVisible}

@@ -13,6 +13,7 @@ export const TopHeader = ({
   setMenuVisible,
   handleEdit,
   handleDelete,
+  canGoBack = true,
 }: {
   title: string;
   rightComponent?: React.ReactNode;
@@ -20,6 +21,7 @@ export const TopHeader = ({
   setMenuVisible?: (visible: boolean) => void;
   handleEdit?: () => void;
   handleDelete?: () => void;
+  canGoBack?: boolean;
 }) => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -41,7 +43,7 @@ export const TopHeader = ({
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <View style={styles.headerContainer}>
-        {(isAddBookPage || isBookPreviewPage) && (
+        {canGoBack && (
           <TouchableOpacity onPress={handleBackPress}>
             <Text style={styles.backButton}>&larr;</Text>
           </TouchableOpacity>

@@ -150,7 +150,7 @@ export default function AddBookScreen({
   };
 
   return (
-    <Layout title={isEdit ? "Edit Book" : "Add Book"}>
+    <Layout title={isEdit ? "Edit Book" : "Add Book"} canGoBack={true}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <KeyboardAvoidingScrollView contentContainerStyle={styles.container}>
           <View style={styles.topSection}>
