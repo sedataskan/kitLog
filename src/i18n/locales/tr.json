@@ -56,8 +56,6 @@
   "book_already_in_library": "Bu kitap zaten kütüphanenizde!",
   "book_added_to_library": "Book added to library!",
   "failed_to_add_book": "Kitap kütüphaneye eklenemedi",
-  "unknown_author": "Bilinmeyen Yazar",
-  "unknown_publisher": "Bilinmeyen Yayınevi",
   "book_updated_successfully": "Kitap başarıyla güncellendi!",
   "book_saved_successfully": "Kitap başarıyla kaydedildi!",
   "permission_required": "Fotoğraflara erişim izni gerekli!",
@@ -82,5 +80,8 @@
   "clearFilters": "Filtreleri Temizle",
   "select_language": "Uygulama Dil Seçimi",
   "english": "İngilizce",
-  "turkish": "Türkçe"
+  "turkish": "Türkçe",
+  "tap_to_change_fav_page_image": "Favori sayfa resmini değiştirmek için dokunun",
+  "favPage": "Favori Sayfa",
+  "favPageNumber": "Favori Sayfa Numarası"
 }

@@ -55,8 +55,6 @@
   "book_already_in_library": "This book is already in your library!",
   "book_added_to_library": "Book added to library!",
   "failed_to_add_book": "Failed to add book to library",
-  "unknown_author": "Unknown Author",
-  "unknown_publisher": "Unknown Publisher",
   "book_updated_successfully": "Book updated successfully!",
   "book_saved_successfully": "Book saved successfully!",
   "permission_required": "Permission to access photos is required!",
@@ -81,5 +79,8 @@
   "clearFilters": "Clear Filters",
   "select_language": "Select Language",
   "english": "English",
-  "turkish": "Turkish"
+  "turkish": "Turkish",
+  "tap_to_change_fav_page_image": "Tap to change favorite page image",
+  "favPage": "Favorite Page",
+  "favPageNumber": "Favorite Page Number"
 }

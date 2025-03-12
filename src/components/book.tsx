@@ -19,6 +19,8 @@ type RootStackParamList = {
       rating: number;
       saveDate: Date;
       status: string;
+      favPage?: number;
+      favPageImage?: string;
     };
   };
 };
@@ -53,6 +55,8 @@ export const Book = ({
   review,
   rating,
   status,
+  favPage,
+  favPageImage,
   style,
 }: {
   title: string;
@@ -63,6 +67,8 @@ export const Book = ({
   review: string;
   rating: number;
   status: string;
+  favPage?: number;
+  favPageImage?: string;
   style?: object;
 }) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
@@ -86,6 +92,8 @@ export const Book = ({
         rating,
         saveDate: new Date(),
         status,
+        favPage,
+        favPageImage,
       },
     });
   };

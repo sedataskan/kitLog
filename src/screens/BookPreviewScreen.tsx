@@ -22,6 +22,8 @@ type BookPreviewScreenRouteProp = RouteProp<
         image: string;
         saveDate: Date;
         status: string;
+        favPage?: number;
+        favPageImage?: string;
       };
     };
   },
@@ -58,6 +60,7 @@ export default function BookPreviewScreen() {
     ...book,
     saveDate: new Date(book.saveDate),
     status: book.status ? book.status : t("to_read"),
+    favPage: book.favPage ? book.favPage : 0,
   };
 
   const handleEdit = () => {
@@ -124,7 +127,10 @@ export default function BookPreviewScreen() {
       handleEdit={handleEdit}
       handleDelete={handleDelete}
     >
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        style={styles.scrollView}
+      >
         <Image
           source={
             parsedBook.image
@@ -169,20 +175,44 @@ export default function BookPreviewScreen() {
         </View>
         <View style={styles.textContainer}>
           <View style={styles.detailsSection}>
-            <Text style={styles.label}>{t("pages")}</Text>
-            <Text style={styles.value}>
-              {parsedBook.pages ? parsedBook.pages : "-"}
-            </Text>
-            <Text style={styles.label}>{t("publication")}</Text>
-            <Text style={styles.value}>
-              {parsedBook.publication
-                ? parsedBook.publication
-                : t("unknown_publisher")}
-            </Text>
-            <Text style={styles.label}>{t("review")}</Text>
-            <Text style={styles.value}>
-              {parsedBook.review ? parsedBook.review : t("no_review")}
-            </Text>
+            {parsedBook.pages && (
+              <>
+                <Text style={styles.label}>{t("pages")}</Text>
+                <Text style={styles.value}>{parsedBook.pages}</Text>
+              </>
+            )}
+            {parsedBook.publication && (
+              <>
+                <Text style={styles.label}>{t("publication")}</Text>
+                <Text style={styles.value}>{parsedBook.publication}</Text>
+              </>
+            )}
+            {parsedBook.review && (
+              <>
+                <Text style={styles.label}>{t("review")}</Text>
+                <Text style={styles.value}>{parsedBook.review}</Text>
+              </>
+            )}
+            {parsedBook.favPageImage && (
+              <>
+                <Text style={styles.label}>
+                  {t("favPage") + " | "}
+                  <Text
+                    style={{
+                      color: colors.textSecondary,
+                      fontSize: sizes.fontSizeSmall,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {parsedBook.favPage ? parsedBook.favPage : "-"}
+                  </Text>
+                </Text>
+                <Image
+                  source={{ uri: getSecureImageUrl(parsedBook.favPageImage) }}
+                  style={styles.favPageImage}
+                />
+              </>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -242,6 +272,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     marginBottom: 10,
   },
+  favPageImage: {
+    width: 200,
+    height: 200,
+    borderRadius: sizes.borderRadius,
+    backgroundColor: colors.background,
+    margin: 10,
+    marginLeft: "20%",
+    marginRight: "20%",
+  },
   status: {
     marginBottom: 5,
     borderRadius: sizes.borderRadius,
@@ -278,5 +317,13 @@ const styles = StyleSheet.create({
   ratingContainer: {
     paddingVertical: 10,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

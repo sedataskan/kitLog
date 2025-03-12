@@ -34,6 +34,8 @@ export default function LibraryScreen() {
       review?: string;
       rating: number;
       status: string;
+      favPage?: number;
+      favPageImage?: string;
     }[]
   >([]);
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
@@ -95,6 +97,8 @@ export default function LibraryScreen() {
     publication: string;
     rating: number;
     status: string;
+    favPage?: number;
+    favPageImage?: string;
   }) => {
     setBooks((prevBooks) => {
       const updatedBooks = [newBook, ...prevBooks];
@@ -164,6 +168,8 @@ export default function LibraryScreen() {
                   review={book.review || ""}
                   rating={book.rating}
                   status={book.status}
+                  favPage={book.favPage}
+                  favPageImage={book.favPageImage}
                 />
               ))}
             </ScrollView>
@@ -202,6 +208,8 @@ export default function LibraryScreen() {
                   review={book.review || ""}
                   rating={book.rating}
                   status={book.status}
+                  favPage={book.favPage}
+                  favPageImage={book.favPageImage}
                 />
               ))}
           </View>
