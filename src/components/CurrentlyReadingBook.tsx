@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,6 +18,8 @@ type RootStackParamList = {
       rating: number;
       saveDate: Date;
       status: string;
+      favPage?: number;
+      favPageImage?: string;
     };
   };
 };
@@ -43,6 +38,8 @@ type CurrentlyReadingBookProps = {
   review: string;
   rating: number;
   status: string;
+  favPage?: number;
+  favPageImage?: string;
 };
 
 const getSecureImageUrl = (url: string | undefined) => {
@@ -59,6 +56,8 @@ export const CurrentlyReadingBook = ({
   review,
   rating,
   status,
+  favPage,
+  favPageImage,
 }: CurrentlyReadingBookProps) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
 
@@ -74,6 +73,8 @@ export const CurrentlyReadingBook = ({
         rating,
         saveDate: new Date(),
         status,
+        favPage,
+        favPageImage,
       },
     });
   };

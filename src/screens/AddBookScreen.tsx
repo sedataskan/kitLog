@@ -45,6 +45,8 @@ export default function AddBookScreen({
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(2.5);
   const [image, setImage] = useState("");
+  const [favPageImage, setFavPageImage] = useState("");
+  const [favPage, setFavPage] = useState(0);
   const [error, setError] = useState("");
   const [errorFields, setErrorFields] = useState<string[]>([]);
   const [status, setStatus] = useState("");
@@ -61,6 +63,8 @@ export default function AddBookScreen({
       setRating(book.rating);
       setImage(book.image);
       setStatus(book.status);
+      setFavPageImage(book.favPageImage);
+      setFavPage(book.favPage);
     }
   }, [isEdit, book]);
 
@@ -83,6 +87,8 @@ export default function AddBookScreen({
       review,
       rating: rating || 2.5,
       image,
+      favPageImage,
+      favPage,
       saveDate: new Date(),
       status,
     };
@@ -111,6 +117,8 @@ export default function AddBookScreen({
       setRating(2.5);
       setImage("");
       setStatus("");
+      setFavPageImage("");
+      setFavPage(0);
       onBookAdded(newBook);
       navigation.navigate("BookPreview" as never, {
         book: newBook,
@@ -138,6 +146,32 @@ export default function AddBookScreen({
         const selectedAsset = result.assets[0];
         if (selectedAsset?.uri) {
           setImage(selectedAsset.uri);
+        }
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      alert(t("error_picking_image"));
+    }
+  };
+
+  const pickFavPageImage = async () => {
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permissionResult.status !== "granted") {
+        alert(t("permission_required"));
+        return;
+      }
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [2, 3],
+        quality: 0.5,
+      });
+      if (!result.canceled) {
+        const selectedAsset = result.assets[0];
+        if (selectedAsset?.uri) {
+          setFavPageImage(selectedAsset.uri);
         }
       }
     } catch (error) {
@@ -274,6 +308,37 @@ export default function AddBookScreen({
                   onChangeText={setPublication}
                 />
               </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>{t("favPageNumber")}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={favPage.toString()}
+                  onChangeText={(text) => setFavPage(Number(text))}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <TouchableOpacity
+                onPress={pickFavPageImage}
+                style={styles.favPageImage}
+                activeOpacity={0.7}
+              >
+                <Image
+                  source={
+                    favPageImage
+                      ? { uri: favPageImage }
+                      : require("../../assets/images/unknownBook.jpg")
+                  }
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+                <View style={styles.imageOverlay}>
+                  <Text style={styles.imageOverlayText}>
+                    {t("tap_to_change_fav_page_image")}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             </>
           )}
 
@@ -458,5 +523,14 @@ const styles = StyleSheet.create({
   reviewInput: {
     height: 100,
     textAlignVertical: "top",
+  },
+  favPageImage: {
+    width: 200,
+    height: 200,
+    borderRadius: sizes.borderRadius,
+    backgroundColor: colors.background,
+    margin: 10,
+    marginLeft: "20%",
+    marginRight: "20%",
   },
 });
