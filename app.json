@@ -3,6 +3,7 @@
     "name": "kitApp",
     "slug": "kitapp",
     "version": "1.0.7",
+    "jsEngine": "hermes",
     "owner": "osntus",
     "runtimeVersion": {
       "policy": "sdkVersion"
