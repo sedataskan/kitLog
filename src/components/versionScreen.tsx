@@ -1,51 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { Text, View, TouchableOpacity, Alert } from 'react-native';
-import Constants from 'expo-constants';
-import { colors } from '../constants/colors';
-import * as Updates from 'expo-updates';
+import React, { useState, useEffect } from "react";
+import { Text, View, TouchableOpacity, Alert } from "react-native";
+import Constants from "expo-constants";
+import { colors } from "../constants/colors";
+import * as Updates from "expo-updates";
+import { useTranslation } from "react-i18next";
 
 export default function VersionScreen() {
   const [clickCount, setClickCount] = useState(0);
-  const [updateStatus, setUpdateStatus] = useState('');
+  const [updateStatus, setUpdateStatus] = useState("");
+  const { t } = useTranslation();
 
   const checkForUpdates = async (noDialog: boolean = false) => {
     try {
-      setUpdateStatus('Güncellemeler kontrol ediliyor...');
-      console.log('Update URL:', Updates.updateUrl);
-      console.log('Runtime Version:', Updates.runtimeVersion);
-      console.log('SDK Version:', Constants.expoConfig?.sdkVersion);
+      setUpdateStatus(t("update_checking"));
+      console.log("Update URL:", Updates.updateUrl);
+      console.log("Runtime Version:", Updates.runtimeVersion);
+      console.log("SDK Version:", Constants.expoConfig?.sdkVersion);
 
       const update = await Updates.checkForUpdateAsync();
-      console.log('Update check result:', update);
+      console.log("Update check result:", update);
 
       if (update.isAvailable) {
-        setUpdateStatus('Güncelleme indiriliyor...');
+        setUpdateStatus(t("update_available"));
         await Updates.fetchUpdateAsync();
-        Alert.alert(
-          "Güncelleme hazır",
-          "Yeni bir güncelleme yüklendi. Uygulamayı yeniden başlatmak ister misiniz?",
-          [
-            { text: "Hayır" },
-            { 
-              text: "Evet", 
-              onPress: async () => {
-                setUpdateStatus('Uygulama yeniden başlatılıyor...');
-                await Updates.reloadAsync();
-              }
-            }
-          ]
-        );
+        Alert.alert(t("update_ready"), t("update_restart"), [
+          { text: t("no") },
+          {
+            text: t("yes"),
+            onPress: async () => {
+              setUpdateStatus(t("update_restart"));
+              await Updates.reloadAsync();
+            },
+          },
+        ]);
       } else {
-        setUpdateStatus('Güncelleme bulunamadı');
+        setUpdateStatus(t("update_not_found"));
         if (!noDialog) {
-          Alert.alert("Bilgi", "Şu anda mevcut bir güncelleme bulunmuyor.");
+          Alert.alert(t("info"), t("update_not_found"));
         }
       }
     } catch (error) {
-      console.log('Güncelleme kontrol hatası:', error);
-      setUpdateStatus('Hata: ' + error.message);
+      console.log("Update check error:", error);
+      setUpdateStatus(t("update_error") + ": " + error.message);
       if (!noDialog) {
-        Alert.alert("Hata", "Güncelleme kontrol edilirken bir hata oluştu: " + error.message);
+        Alert.alert(t("error"), t("update_error") + ": " + error.message);
       }
     }
   };
@@ -66,10 +64,10 @@ export default function VersionScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <TouchableOpacity onPress={handlePress}>
         <Text style={{ fontSize: 18, color: colors.primary }}>
-          App Version: {Constants?.expoConfig?.version}
+          {t("app_version")}: {Constants?.expoConfig?.version}
         </Text>
         <Text style={{ fontSize: 14, color: colors.secondary }}>
           {updateStatus}

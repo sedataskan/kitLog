@@ -5,6 +5,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 type RootStackParamList = {
   BookPreview: {
@@ -27,29 +28,19 @@ type BookScreenNavigationProp = StackNavigationProp<
   "BookPreview"
 >;
 
-const getStatusColor = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'read':
-      return '#4CAF50';
-    case 'to read':
-      return '#FF9800';
-    case 'reading':
-      return '#2196F3';
-    default:
-      return colors.textSecondary;
-  }
-};
-
 const getStatusIcon = (status: string) => {
   switch (status.toLowerCase()) {
-    case 'read':
-      return 'checkmark-circle';
-    case 'to read':
-      return 'time';
-    case 'reading':
-      return 'book';
+    case "read":
+    case "okudum":
+      return "checkmark-circle";
+    case "to read":
+    case "okunacak":
+      return "time";
+    case "currently reading":
+    case "şu an okuyorum":
+      return "book";
     default:
-      return 'help-circle';
+      return "help-circle";
   }
 };
 
@@ -75,12 +66,12 @@ export const Book = ({
   style?: object;
 }) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
-  const statusColor = getStatusColor(status);
-  const statusIcon = getStatusIcon(status);
+  const { t } = useTranslation();
+  const statusIcon = getStatusIcon(status, t);
 
   const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
-    return url.replace('http://', 'https://').replace('&edge=curl', '');
+    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
+    return url.replace("http://", "https://").replace("&edge=curl", "");
   };
 
   const handlePress = () => {
@@ -103,7 +94,7 @@ export const Book = ({
     <TouchableOpacity onPress={handlePress} style={[styles.container, style]}>
       <View style={styles.imageContainer}>
         <View style={styles.statusBadge}>
-          <Ionicons name={statusIcon} size={12} color={statusColor} />
+          <Ionicons name={statusIcon} size={12} color={colors.primary} />
         </View>
         <Image
           source={
@@ -137,18 +128,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary,
     justifyContent: "center",
     alignItems: "center",
-    position: 'relative',
+    position: "relative",
   },
   statusBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
     backgroundColor: colors.white,
     borderRadius: 12,
     width: 24,
     height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1,
     elevation: 2,
     shadowColor: "#000",

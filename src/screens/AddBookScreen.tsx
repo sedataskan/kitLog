@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Layout } from "../layout/layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Rating } from "react-native-ratings";
 import { useNavigation } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
 import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
@@ -19,9 +18,10 @@ import { ScrollView } from "react-native-gesture-handler";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Picker } from "@react-native-picker/picker";
-import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
-import { StarRating } from '../components/StarRating';
+import * as ImagePicker from "expo-image-picker";
+import { Ionicons } from "@expo/vector-icons";
+import { StarRating } from "../components/StarRating";
+import { useTranslation } from "react-i18next";
 
 type AddBookScreenRouteProp = RouteProp<
   {
@@ -37,6 +37,7 @@ export default function AddBookScreen({
 }) {
   const { onBookAdded = () => {}, book, isEdit } = route.params;
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [pages, setPages] = useState("");
@@ -65,13 +66,11 @@ export default function AddBookScreen({
 
   const handleSave = async () => {
     const missingFields = [];
-    if (!title) missingFields.push("Title");
-    if (!status) missingFields.push("Status");
+    if (!title) missingFields.push(t("title"));
+    if (!status) missingFields.push(t("status"));
 
     if (missingFields.length > 0) {
-      setError(
-        `The following fields are mandatory: ${missingFields.join(", ")}`
-      );
+      setError(`${t("mandatory_fields")}: ${missingFields.join(", ")}`);
       setErrorFields(missingFields);
       return;
     }
@@ -96,11 +95,11 @@ export default function AddBookScreen({
           b.title === book.title ? newBook : b
         );
         await AsyncStorage.setItem("books", JSON.stringify(updatedBooks));
-        alert("Book updated successfully!");
+        alert(t("book_updated_successfully"));
       } else {
         books.push(newBook);
         await AsyncStorage.setItem("books", JSON.stringify(books));
-        alert("Book saved successfully!");
+        alert(t("book_saved_successfully"));
       }
       setError("");
       setErrorFields([]);
@@ -113,9 +112,9 @@ export default function AddBookScreen({
       setImage("");
       setStatus("");
       onBookAdded(newBook);
-      navigation.navigate('BookPreview', {
-        book: newBook
-      } as never);
+      navigation.navigate("BookPreview" as never, {
+        book: newBook,
+      });
     } catch (error) {
       console.error("Error saving book", error);
     }
@@ -123,20 +122,18 @@ export default function AddBookScreen({
 
   const pickImage = async () => {
     try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (permissionResult.status !== 'granted') {
-        alert('Fotoğraflara erişim izni gerekli!');
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permissionResult.status !== "granted") {
+        alert(t("permission_required"));
         return;
       }
-
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [2, 3],
         quality: 0.5,
       });
-
       if (!result.canceled) {
         const selectedAsset = result.assets[0];
         if (selectedAsset?.uri) {
@@ -144,18 +141,18 @@ export default function AddBookScreen({
         }
       }
     } catch (error) {
-      console.error('Error picking image:', error);
-      alert('Resim seçilirken bir hata oluştu. Lütfen tekrar deneyin.');
+      console.error("Error picking image:", error);
+      alert(t("error_picking_image"));
     }
   };
 
   return (
-    <Layout title={isEdit ? "Edit Book" : "Add Book"} canGoBack={true}>
+    <Layout title={isEdit ? t("edit_book") : t("add_book")} canGoBack={true}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         <KeyboardAvoidingScrollView contentContainerStyle={styles.container}>
           <View style={styles.topSection}>
-            <TouchableOpacity 
-              onPress={pickImage} 
+            <TouchableOpacity
+              onPress={pickImage}
               style={styles.imageContainer}
               activeOpacity={0.7}
             >
@@ -169,19 +166,21 @@ export default function AddBookScreen({
                 resizeMode="cover"
               />
               <View style={styles.imageOverlay}>
-                <Text style={styles.imageOverlayText}>Tap to change image</Text>
+                <Text style={styles.imageOverlayText}>
+                  {t("tap_to_change_image")}
+                </Text>
               </View>
             </TouchableOpacity>
 
             <View style={styles.inputSection}>
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>
-                  Title <Text style={styles.mandatory}>*</Text>
+                  {t("title")} <Text style={styles.mandatory}>*</Text>
                 </Text>
                 <TextInput
                   style={[
                     styles.input,
-                    errorFields.includes("Title") && styles.inputError,
+                    errorFields.includes(t("title")) && styles.inputError,
                   ]}
                   value={title}
                   onChangeText={setTitle}
@@ -189,18 +188,20 @@ export default function AddBookScreen({
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Status <Text style={styles.mandatory}>*</Text></Text>
+                <Text style={styles.label}>
+                  {t("status")} <Text style={styles.mandatory}>*</Text>
+                </Text>
                 <TouchableOpacity
                   style={styles.dropdown}
                   onPress={() => setPickerVisible(true)}
                 >
                   <Text style={styles.dropdownText}>
-                    {status || "Select Status"}
+                    {status || t("select_status")}
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              {status === "Read" && (
+              {status === t("read") && (
                 <View style={[styles.inputContainer, styles.ratingContainer]}>
                   <StarRating
                     rating={rating}
@@ -213,7 +214,7 @@ export default function AddBookScreen({
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Review</Text>
+            <Text style={styles.label}>{t("review")}</Text>
             <TextInput
               style={[styles.input, styles.reviewInput]}
               value={review}
@@ -223,28 +224,28 @@ export default function AddBookScreen({
             />
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.additionalFieldsButton}
             onPress={() => setShowAdditionalFields(!showAdditionalFields)}
           >
-            <Text style={styles.additionalFieldsText}>Additional Fields</Text>
-            <Ionicons 
-              name={showAdditionalFields ? "chevron-up" : "chevron-down"} 
-              size={24} 
-              color={colors.primary} 
+            <Text style={styles.additionalFieldsText}>
+              {t("additional_fields")}
+            </Text>
+            <Ionicons
+              name={showAdditionalFields ? "chevron-up" : "chevron-down"}
+              size={24}
+              color={colors.primary}
             />
           </TouchableOpacity>
 
           {showAdditionalFields && (
             <>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>
-                  Author
-                </Text>
+                <Text style={styles.label}>{t("author")}</Text>
                 <TextInput
                   style={[
                     styles.input,
-                    errorFields.includes("Author") && styles.inputError,
+                    errorFields.includes(t("author")) && styles.inputError,
                   ]}
                   value={author}
                   onChangeText={setAuthor}
@@ -252,13 +253,12 @@ export default function AddBookScreen({
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>
-                  Number of Pages
-                </Text>
+                <Text style={styles.label}>{t("number_of_pages")}</Text>
                 <TextInput
                   style={[
                     styles.input,
-                    errorFields.includes("Number of Pages") && styles.inputError,
+                    errorFields.includes(t("number_of_pages")) &&
+                      styles.inputError,
                   ]}
                   value={pages}
                   onChangeText={setPages}
@@ -267,7 +267,7 @@ export default function AddBookScreen({
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Publication</Text>
+                <Text style={styles.label}>{t("publication")}</Text>
                 <TextInput
                   style={styles.input}
                   value={publication}
@@ -279,7 +279,11 @@ export default function AddBookScreen({
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.button}>
-            <Button color={colors.primary} title="Save" onPress={handleSave} />
+            <Button
+              color={colors.primary}
+              title={t("save")}
+              onPress={handleSave}
+            />
           </View>
         </KeyboardAvoidingScrollView>
       </ScrollView>
@@ -292,10 +296,7 @@ export default function AddBookScreen({
       >
         <View style={styles.bottomPickerContainer}>
           <View style={styles.pickerHeader}>
-            <Button
-              title="Done"
-              onPress={() => setPickerVisible(false)}
-            />
+            <Button title={t("done")} onPress={() => setPickerVisible(false)} />
           </View>
           <Picker
             selectedValue={status}
@@ -305,9 +306,12 @@ export default function AddBookScreen({
             style={styles.picker}
             itemStyle={styles.dropdownText}
           >
-            <Picker.Item label="To Read" value="To Read" />
-            <Picker.Item label="Read" value="Read" />
-            <Picker.Item label="Reading" value="Reading" />
+            <Picker.Item label={t("to_read")} value={t("to_read")} />
+            <Picker.Item label={t("read")} value={t("read")} />
+            <Picker.Item
+              label={t("currently_reading")}
+              value={t("currently_reading")}
+            />
           </Picker>
         </View>
       </Modal>
@@ -358,8 +362,8 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
     borderRadius: sizes.borderRadius,
     backgroundColor: colors.backgroundSecondary,
   },
@@ -413,46 +417,46 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   imageContainer: {
-    position: 'relative',
+    position: "relative",
     width: 120,
     height: 180,
     borderRadius: sizes.borderRadius,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   imageOverlay: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: "rgba(0,0,0,0.6)",
     padding: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   imageOverlayText: {
-    color: 'white',
+    color: "white",
     fontSize: sizes.fontSizeSmall,
   },
   ratingContainer: {
     paddingVertical: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   additionalFieldsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 10,
     backgroundColor: colors.backgroundSecondary,
     borderRadius: 5,
     marginVertical: 10,
-    width: '100%',
+    width: "100%",
   },
   additionalFieldsText: {
     color: colors.primary,
     fontSize: sizes.fontSizeMedium,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   reviewInput: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
 });

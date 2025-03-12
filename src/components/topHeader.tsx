@@ -5,6 +5,7 @@ import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Menu, MenuItem, MenuDivider } from "react-native-material-menu";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export const TopHeader = ({
   title,
@@ -29,6 +30,8 @@ export const TopHeader = ({
   const isAddBookPage = route.name === "AddBook";
   const isBookPreviewPage = route.name === "BookPreview";
 
+  const { t } = useTranslation();
+
   const handleBackPress = () => {
     if (isAddBookPage && route.params?.book) {
       const book = route.params?.book;
@@ -41,7 +44,7 @@ export const TopHeader = ({
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.headerContainer}>
         {canGoBack && (
           <TouchableOpacity onPress={handleBackPress}>
@@ -63,13 +66,13 @@ export const TopHeader = ({
               }
               onRequestClose={() => setMenuVisible(false)}
             >
-              <MenuItem onPress={handleEdit}>Edit</MenuItem>
+              <MenuItem onPress={handleEdit}>{t("edit")}</MenuItem>
               <MenuDivider />
               <MenuItem
                 onPress={handleDelete}
                 textStyle={{ color: colors.error }}
               >
-                Delete
+                {t("delete")}
               </MenuItem>
             </Menu>
           )}

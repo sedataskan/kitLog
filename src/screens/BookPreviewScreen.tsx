@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Text, Image, ScrollView, Alert } from "react-native";
 import { Layout } from "../layout/layout";
+import DropDownPicker from "react-native-dropdown-picker";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
-import { StarRating } from '../components/StarRating';
+import { StarRating } from "../components/StarRating";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
+import { useTranslation } from "react-i18next";
 
 type BookPreviewScreenRouteProp = RouteProp<
   {
@@ -26,35 +28,27 @@ type BookPreviewScreenRouteProp = RouteProp<
   "params"
 >;
 
-const getStatusStyle = (status: string) => {
-  switch (status.toLowerCase()) {
-    case "read":
-      return styles.statusRead;
-    case "reading":
-      return styles.statusReading;
-    case "to read":
-      return styles.statusToRead;
-    default:
-      return styles.statusToRead;
-  }
-};
-
 export default function BookPreviewScreen() {
   const route = useRoute<BookPreviewScreenRouteProp>();
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const { book } = route.params;
   const [menuVisible, setMenuVisible] = useState(false);
+  const [bookStatus, setBookStatus] = useState(book.status);
+  const [open, setOpen] = useState(false);
 
   const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
-    return url.replace('http://', 'https://').replace('&edge=curl', '');
+    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
+    return url.replace("http://", "https://").replace("&edge=curl", "");
   };
 
   if (!book) {
     return (
-      <Layout title="Book Preview">
+      <Layout title={t("book_preview")}>
         <View style={styles.container}>
-          <Text style={styles.errorText}>Book details not available.</Text>
+          <Text style={styles.errorText}>
+            {t("book_details_not_available")}
+          </Text>
         </View>
       </Layout>
     );
@@ -63,23 +57,27 @@ export default function BookPreviewScreen() {
   const parsedBook = {
     ...book,
     saveDate: new Date(book.saveDate),
-    status: book.status ? book.status : "To Read",
+    status: book.status ? book.status : t("to_read"),
   };
 
   const handleEdit = () => {
     setMenuVisible(false);
     navigation.navigate("AddBook", {
-      book: { ...parsedBook, saveDate: parsedBook.saveDate.toISOString() },
+      book: {
+        ...parsedBook,
+        status: bookStatus,
+        saveDate: parsedBook.saveDate.toISOString(),
+      },
       isEdit: true,
     });
   };
 
   const handleDelete = async () => {
     setMenuVisible(false);
-    Alert.alert("Delete Book", "Are you sure you want to delete this book?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("delete_book"), t("delete_book_confirmation"), [
+      { text: t("cancel"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("delete"),
         style: "destructive",
         onPress: async () => {
           try {
@@ -98,6 +96,25 @@ export default function BookPreviewScreen() {
     ]);
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    setBookStatus(newStatus);
+    try {
+      const existingBooks = await AsyncStorage.getItem("books");
+      const books = existingBooks ? JSON.parse(existingBooks) : [];
+      const updatedBooks = books.map((b: any) =>
+        b.title === book.title ? { ...b, status: newStatus } : b
+      );
+      await AsyncStorage.setItem("books", JSON.stringify(updatedBooks));
+    } catch (error) {
+      console.error("Error updating book status", error);
+    }
+  };
+
+  const [items, setItems] = useState([
+    { label: t("read"), value: t("read") },
+    { label: t("to_read"), value: t("to_read") },
+    { label: t("currently_reading"), value: t("currently_reading") },
+  ]);
   return (
     <Layout
       canGoBack={true}
@@ -121,12 +138,10 @@ export default function BookPreviewScreen() {
         <Text style={styles.date}>
           {parsedBook.saveDate
             ? new Date(parsedBook.saveDate).toLocaleDateString()
-            : "No Date Added"}
+            : "-"}
         </Text>
-        <Text style={[styles.status, getStatusStyle(parsedBook.status)]}>
-          {parsedBook.status}
-        </Text>
-        {parsedBook.status.toLowerCase() === 'read' && (
+        {(bookStatus.toLowerCase() === "read" ||
+          bookStatus.toLowerCase() === "okudum") && (
           <View style={styles.ratingContainer}>
             <StarRating
               rating={parsedBook.rating}
@@ -135,17 +150,38 @@ export default function BookPreviewScreen() {
             />
           </View>
         )}
+        <View style={styles.statusContainer}>
+          <DropDownPicker
+            open={open}
+            value={bookStatus}
+            items={items}
+            setOpen={setOpen}
+            setValue={(callback) => {
+              const newStatus = callback(bookStatus);
+              setBookStatus(newStatus);
+              handleStatusChange(newStatus);
+            }}
+            setItems={setItems}
+            style={styles.status}
+            containerStyle={{ width: "100%" }}
+            dropDownContainerStyle={{ backgroundColor: colors.background }}
+          />
+        </View>
         <View style={styles.textContainer}>
           <View style={styles.detailsSection}>
-            <Text style={styles.label}>Pages</Text>
-            <Text style={styles.value}>{parsedBook.pages}</Text>
-            <Text style={styles.label}>Publication</Text>
+            <Text style={styles.label}>{t("pages")}</Text>
             <Text style={styles.value}>
-              {parsedBook.publication ? parsedBook.publication : "Unknown"}
+              {parsedBook.pages ? parsedBook.pages : "-"}
             </Text>
-            <Text style={styles.label}>Review</Text>
+            <Text style={styles.label}>{t("publication")}</Text>
             <Text style={styles.value}>
-              {parsedBook.review ? parsedBook.review : "No Comment Added"}
+              {parsedBook.publication
+                ? parsedBook.publication
+                : t("unknown_publisher")}
+            </Text>
+            <Text style={styles.label}>{t("review")}</Text>
+            <Text style={styles.value}>
+              {parsedBook.review ? parsedBook.review : t("no_review")}
             </Text>
           </View>
         </View>
@@ -208,22 +244,20 @@ const styles = StyleSheet.create({
   },
   status: {
     marginBottom: 5,
-    padding: 5,
     borderRadius: sizes.borderRadius,
     textAlign: "center",
     fontSize: sizes.fontSizeSmall,
+    color: colors.textPrimary,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  statusRead: {
-    backgroundColor: '#4CAF50',
-    color: "white",
-  },
-  statusReading: {
-    backgroundColor: '#2196F3',
-    color: "white",
-  },
-  statusToRead: {
-    backgroundColor: '#FF9800',
-    color: "white",
+  statusContainer: {
+    marginBottom: 20,
+    marginTop: 10,
+    width: "50%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   errorText: {
     color: colors.error,

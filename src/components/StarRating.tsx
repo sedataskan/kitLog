@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../constants/colors';
+import React from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { colors } from "../constants/colors";
 
 interface StarRatingProps {
   rating: number;
@@ -9,7 +9,11 @@ interface StarRatingProps {
   size?: number;
 }
 
-export const StarRating = ({ rating, onRatingChange, size = 30 }: StarRatingProps) => {
+export const StarRating = ({
+  rating,
+  onRatingChange,
+  size = 30,
+}: StarRatingProps) => {
   const handlePress = (position: number) => {
     if (position === rating) {
       onRatingChange(0);
@@ -21,7 +25,7 @@ export const StarRating = ({ rating, onRatingChange, size = 30 }: StarRatingProp
   const renderStar = (index: number) => {
     const starValue = index + 1;
     const difference = rating - index;
-    
+
     return (
       <View key={index} style={styles.starContainer}>
         <View style={styles.starIconContainer}>
@@ -48,35 +52,33 @@ export const StarRating = ({ rating, onRatingChange, size = 30 }: StarRatingProp
   };
 
   return (
-    <View style={styles.container}>
-      {[0, 1, 2, 3, 4].map(renderStar)}
-    </View>
+    <View style={styles.container}>{[0, 1, 2, 3, 4].map(renderStar)}</View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   starContainer: {
     padding: 5,
-    position: 'relative',
+    position: "relative",
   },
   starIconContainer: {
     zIndex: 0,
   },
   touchableContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 5,
     left: 5,
     right: 5,
     bottom: 5,
-    flexDirection: 'row',
+    flexDirection: "row",
     zIndex: 1,
   },
   halfStar: {
-    height: '100%',
+    height: "100%",
   },
-}); 
+});

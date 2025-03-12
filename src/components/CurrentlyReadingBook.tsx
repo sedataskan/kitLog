@@ -1,10 +1,17 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
-import { colors } from '../constants/colors';
-import { sizes } from '../constants/sizes';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import { colors } from "../constants/colors";
+import { sizes } from "../constants/sizes";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 type RootStackParamList = {
   BookPreview: {
@@ -22,7 +29,10 @@ type RootStackParamList = {
   };
 };
 
-type BookScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookPreview'>;
+type BookScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "BookPreview"
+>;
 
 type CurrentlyReadingBookProps = {
   title: string;
@@ -36,8 +46,8 @@ type CurrentlyReadingBookProps = {
 };
 
 const getSecureImageUrl = (url: string | undefined) => {
-  if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
-  return url.replace('http://', 'https://').replace('&edge=curl', '');
+  if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
+  return url.replace("http://", "https://").replace("&edge=curl", "");
 };
 
 export const CurrentlyReadingBook = ({
@@ -53,7 +63,7 @@ export const CurrentlyReadingBook = ({
   const navigation = useNavigation<BookScreenNavigationProp>();
 
   const handlePress = () => {
-    navigation.navigate('BookPreview', {
+    navigation.navigate("BookPreview", {
       book: {
         title,
         author,
@@ -75,7 +85,7 @@ export const CurrentlyReadingBook = ({
           source={
             image
               ? { uri: getSecureImageUrl(image) }
-              : require('../../assets/images/unknownBook.jpg')
+              : require("../../assets/images/unknownBook.jpg")
           }
           style={styles.image}
         />
@@ -107,7 +117,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     borderRadius: sizes.borderRadius,
-    overflow: 'hidden',
+    overflow: "hidden",
     backgroundColor: colors.secondary,
     elevation: 5,
     shadowColor: colors.black,
@@ -119,22 +129,22 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   image: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
+    width: "100%",
+    height: "100%",
+    position: "absolute",
     borderRadius: sizes.borderRadius,
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(75, 110, 124, 0.85)',
-    justifyContent: 'flex-end',
+    backgroundColor: colors.blur,
+    justifyContent: "flex-end",
   },
   content: {
     padding: 15,
   },
   title: {
     fontSize: sizes.fontSizeMedium,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.white,
     marginBottom: 4,
   },
@@ -145,8 +155,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   iconContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   pagesText: {
     fontSize: sizes.fontSizeSmall,
@@ -154,4 +164,4 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     marginLeft: 4,
   },
-}); 
+});
