@@ -13,8 +13,8 @@ jobs:
         if: github.event.pull_request.merged == true
         run: echo "Branch was merged, proceeding with deletion."
 
-      - name: Delete branch if merged
-        if: github.event.pull_request.merged == true
+      - name: Prevent deletion of protected branches
+        if: github.event.pull_request.merged == true && github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop'
         uses: octokit/request-action@v2.x
         with:
           route: DELETE /repos/sedataskan/kitApp/git/refs/heads/${{ github.event.pull_request.head.ref }}
