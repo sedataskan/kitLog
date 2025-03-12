@@ -1,4 +1,11 @@
-import { StyleSheet, ScrollView, View, TouchableOpacity, Dimensions, Text } from "react-native";
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Dimensions,
+  Text,
+} from "react-native";
 import { Layout } from "../layout/layout";
 import { Book } from "../components/book";
 import { CurrentlyReadingBook } from "../components/CurrentlyReadingBook";
@@ -12,9 +19,11 @@ import { useCallback } from "react";
 import FilterModal from "../components/filterModal";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export default function LibraryScreen() {
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const [books, setBooks] = useState<
     {
       title: string;
@@ -71,7 +80,8 @@ export default function LibraryScreen() {
       (!filters.name ||
         book.title.toLowerCase().includes(filters.name.toLowerCase()) ||
         book.author.toLowerCase().includes(filters.name.toLowerCase())) &&
-      (!filters.status || book.status.toLowerCase() === filters.status.toLowerCase()) &&
+      (!filters.status ||
+        book.status.toLowerCase() === filters.status.toLowerCase()) &&
       (!filters.rating || book.rating === filters.rating)
     );
   });
@@ -93,12 +103,17 @@ export default function LibraryScreen() {
     });
   };
 
-  const isFilterActive = filters.status !== "" || filters.rating !== 0 || filters.name !== "";
-  const currentlyReadingBooks = books.filter(book => book.status.toLowerCase() === "reading");
+  const isFilterActive =
+    filters.status !== "" || filters.rating !== 0 || filters.name !== "";
+  const currentlyReadingBooks = books.filter(
+    (book) =>
+      book.status.toLowerCase() === "currently reading" ||
+      book.status.toLowerCase() === "şu an okuyorum"
+  );
 
   return (
     <Layout
-      title="Library"
+      title={t("library")}
       rightComponent={
         <TouchableOpacity
           style={styles.filterButton}
@@ -108,8 +123,8 @@ export default function LibraryScreen() {
         </TouchableOpacity>
       }
       menuVisible={false}
-      setMenuVisible={() => { }}
-      handleEdit={() => { }}
+      setMenuVisible={() => {}}
+      handleEdit={() => {}}
     >
       <AddButton
         onPress={() =>
@@ -129,7 +144,9 @@ export default function LibraryScreen() {
           <View style={styles.currentlyReadingSection}>
             <View style={styles.sectionTitleContainer}>
               <Ionicons name="book" size={22} color={colors.primary} />
-              <Text style={styles.sectionTitleText}>Currently Reading</Text>
+              <Text style={styles.sectionTitleText}>
+                {t("currently_reading")}
+              </Text>
             </View>
             <ScrollView
               horizontal
@@ -155,14 +172,25 @@ export default function LibraryScreen() {
         <View style={styles.bookshelfSection}>
           <View style={styles.bookshelfTitleContainer}>
             <Ionicons name="library" size={20} color={colors.primary} />
-            <Text style={styles.bookshelfTitleText}>Bookshelf</Text>
+            <Text style={styles.bookshelfTitleText}>{t("bookshelf")}</Text>
             <Text style={styles.bookCount}>
-              {filteredBooks.filter(book => isFilterActive ? true : book.status.toLowerCase() !== "reading").length} books
+              {
+                filteredBooks.filter((book) =>
+                  isFilterActive
+                    ? true
+                    : book.status.toLowerCase() !== t("reading").toLowerCase()
+                ).length
+              }{" "}
+              {t("books")}
             </Text>
           </View>
           <View style={styles.booksGrid}>
             {filteredBooks
-              .filter(book => isFilterActive ? true : book.status.toLowerCase() !== "reading")
+              .filter((book) =>
+                isFilterActive
+                  ? true
+                  : book.status.toLowerCase() !== t("reading").toLowerCase()
+              )
               .map((book, index) => (
                 <Book
                   key={index}
@@ -215,8 +243,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   sectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 18,
     opacity: 0.9,
   },
@@ -226,7 +254,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: colors.textSecondary,
     marginLeft: 6,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   currentlyReadingList: {
     paddingHorizontal: 0,
@@ -239,8 +267,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   bookshelfTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 20,
     marginBottom: 15,
     opacity: 0.85,
@@ -251,7 +279,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: colors.textSecondary,
     marginLeft: 6,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   bookCount: {
     fontSize: sizes.fontSizeSmall,

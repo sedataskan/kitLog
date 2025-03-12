@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../constants/colors";
-import { Rating } from "react-native-ratings";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedGestureHandler,
@@ -20,13 +19,18 @@ import Animated, {
   withSpring,
   runOnJS,
 } from "react-native-reanimated";
-import { StarRating } from './StarRating';
-import { Picker } from '@react-native-picker/picker';
+import { StarRating } from "./StarRating";
+import { Picker } from "@react-native-picker/picker";
+import { useTranslation } from "react-i18next";
 
 interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
-  onApplyFilters: (filters: { status: string; rating: number; name: string }) => void;
+  onApplyFilters: (filters: {
+    status: string;
+    rating: number;
+    name: string;
+  }) => void;
   filters: {
     status: string;
     rating: number;
@@ -34,7 +38,13 @@ interface FilterModalProps {
   };
 }
 
-const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalProps) => {
+const FilterModal = ({
+  visible,
+  onClose,
+  onApplyFilters,
+  filters,
+}: FilterModalProps) => {
+  const { t } = useTranslation();
   const [status, setStatus] = useState("");
   const [rating, setRating] = useState(0);
   const [name, setName] = useState("");
@@ -64,14 +74,18 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
 
   const closeModal = () => {
     setIsClosing(true);
-    translateY.value = withSpring(1000, {
-      damping: 20,
-      stiffness: 90,
-      restSpeedThreshold: 100,
-      restDisplacementThreshold: 100,
-    }, () => {
-      runOnJS(onClose)();
-    });
+    translateY.value = withSpring(
+      1000,
+      {
+        damping: 20,
+        stiffness: 90,
+        restSpeedThreshold: 100,
+        restDisplacementThreshold: 100,
+      },
+      () => {
+        runOnJS(onClose)();
+      }
+    );
     backgroundOpacity.value = withSpring(0);
   };
 
@@ -129,57 +143,68 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
   };
 
   return (
-    <Modal 
-      visible={visible} 
-      animationType="none" 
+    <Modal
+      visible={visible}
+      animationType="none"
       transparent
       onRequestClose={closeModal}
     >
-      <Animated.View 
+      <Animated.View
         style={[
-          styles.modalBackground, 
+          styles.modalBackground,
           animatedBackgroundStyle,
-          { pointerEvents: isClosing ? 'none' : 'auto' }
+          { pointerEvents: isClosing ? "none" : "auto" },
         ]}
       >
-        <PanGestureHandler onGestureEvent={gestureHandler} minDist={10} enabled={!isClosing}>
+        <PanGestureHandler
+          onGestureEvent={gestureHandler}
+          minDist={10}
+          enabled={!isClosing}
+        >
           <Animated.View style={[styles.modalContainer, animatedStyle]}>
             <View style={styles.header}>
-              <Text style={styles.title}>Filter Books</Text>
+              <Text style={styles.title}>{t("filterBooks")}</Text>
               <TouchableOpacity onPress={closeModal}>
                 <Ionicons name="close" size={24} color="black" />
               </TouchableOpacity>
             </View>
             <View style={styles.contentContainer}>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Name</Text>
+                <Text style={styles.label}>{t("name")}</Text>
                 <TextInput
-                  placeholder="Enter name"
+                  placeholder={t("enterName")}
                   placeholderTextColor={colors.textSecondary}
                   value={name}
                   onChangeText={setName}
                   style={styles.input}
                 />
               </View>
-              
+
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Status</Text>
+                <Text style={styles.label}>{t("status")}</Text>
                 <TouchableOpacity
                   style={styles.input}
                   onPress={() => setPickerVisible(true)}
                 >
-                  <Text style={[
-                    styles.dropdownText,
-                    !status && styles.placeholderText
-                  ]}>
-                    {status || "Select Status"}
+                  <Text
+                    style={[
+                      styles.dropdownText,
+                      !status && styles.placeholderText,
+                    ]}
+                  >
+                    {status || t("selectStatus")}
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              <View style={[styles.ratingContainer, rating > 0 && styles.ratingApplied]}>
+              <View
+                style={[
+                  styles.ratingContainer,
+                  rating > 0 && styles.ratingApplied,
+                ]}
+              >
                 <View style={styles.ratingHeader}>
-                  <Text style={styles.ratingLabel}>Minimum Rating</Text>
+                  <Text style={styles.ratingLabel}>{t("minimumRating")}</Text>
                   {rating > 0 && (
                     <Text style={styles.ratingValue}>{rating.toFixed(1)}★</Text>
                   )}
@@ -196,14 +221,18 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
                   style={styles.applyButton}
                   onPress={applyFilters}
                 >
-                  <Text style={styles.applyButtonText}>Apply Filters</Text>
+                  <Text style={styles.applyButtonText}>
+                    {t("applyFilters")}
+                  </Text>
                 </TouchableOpacity>
                 {hasFilters && (
                   <TouchableOpacity
                     style={styles.clearButton}
                     onPress={clearFilters}
                   >
-                    <Text style={styles.clearButtonText}>Clear Filters</Text>
+                    <Text style={styles.clearButtonText}>
+                      {t("clearFilters")}
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -220,25 +249,24 @@ const FilterModal = ({ visible, onClose, onApplyFilters, filters }: FilterModalP
       >
         <View style={styles.bottomPickerContainer}>
           <View style={styles.pickerHeader}>
-            <Button
-              title="Done"
-              onPress={() => setPickerVisible(false)}
-            />
+            <Button title={t("done")} onPress={() => setPickerVisible(false)} />
           </View>
           <Picker
             selectedValue={status}
             onValueChange={(itemValue) => {
               setStatus(itemValue);
-              if (Platform.OS === 'android') {
+              if (Platform.OS === "android") {
                 setPickerVisible(false);
               }
             }}
             style={styles.picker}
           >
-            <Picker.Item label="All Status" value="" />
-            <Picker.Item label="To Read" value="To Read" />
-            <Picker.Item label="Read" value="Read" />
-            <Picker.Item label="Reading" value="Reading" />
+            <Picker.Item label={t("to_read")} value={t("to_read")} />
+            <Picker.Item label={t("read")} value={t("read")} />
+            <Picker.Item
+              label={t("currently_reading")}
+              value={t("currently_reading")}
+            />
           </Picker>
         </View>
       </Modal>
@@ -313,7 +341,7 @@ const styles = StyleSheet.create({
   ratingContainer: {
     paddingVertical: 16,
     paddingHorizontal: 12,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
     borderRadius: 8,
   },
   ratingApplied: {
@@ -321,20 +349,20 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   ratingHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
   ratingLabel: {
     fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
+    color: "#666",
+    fontWeight: "500",
   },
   ratingValue: {
     fontSize: 16,
     color: colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   rating: {
     paddingVertical: 5,

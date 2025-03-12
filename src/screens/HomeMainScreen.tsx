@@ -1,12 +1,23 @@
-import { StyleSheet, Text, View, TextInput, FlatList, Image, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 import { Layout } from "../layout/layout";
 import React, { useState, useEffect } from "react";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useTranslation } from "react-i18next";
 
 type RootStackParamList = {
   BookDetail: {
@@ -14,7 +25,7 @@ type RootStackParamList = {
   };
 };
 
-type NavigationProp = StackNavigationProp<RootStackParamList, 'BookDetail'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, "BookDetail">;
 
 interface Book {
   id: string;
@@ -32,20 +43,23 @@ interface Book {
   };
 }
 
-const RECOMMENDED_CATEGORIES = [
-  { title: "Best Sellers", query: "subject:fiction&orderBy=newest" },
-  { title: "Classic Literature", query: "subject:classic+literature" },
-  { title: "Science & Technology", query: "subject:science+technology" },
-  { title: "Personal Development", query: "subject:self-help" },
-];
-
 export default function HomeMainScreen() {
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
-  const [recommendedBooks, setRecommendedBooks] = useState<{[key: string]: Book[]}>({});
+  const [recommendedBooks, setRecommendedBooks] = useState<{
+    [key: string]: Book[];
+  }>({});
   const [loadingRecommended, setLoadingRecommended] = useState(false);
   const navigation = useNavigation<NavigationProp>();
+
+  const RECOMMENDED_CATEGORIES = [
+    { title: t("best_sellers"), query: "subject:fiction&orderBy=newest" },
+    { title: t("classic_literature"), query: "subject:classic+literature" },
+    { title: t("science_technology"), query: "subject:science+technology" },
+    { title: t("personal_development"), query: "subject:self-help" },
+  ];
 
   useEffect(() => {
     fetchRecommendedBooks();
@@ -60,20 +74,19 @@ export default function HomeMainScreen() {
   const fetchRecommendedBooks = async () => {
     setLoadingRecommended(true);
     try {
-      const recommendedResults: {[key: string]: Book[]} = {};
-      
+      const recommendedResults: { [key: string]: Book[] } = {};
+
       for (const category of RECOMMENDED_CATEGORIES) {
         const response = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=${category.query}&maxResults=5`
+          `https://www.googleapis.com/books/v1/volumes?q=${category.query}&maxResults=5&langRestrict=${i18n.language}`
         );
         const data = await response.json();
         if (data.items) {
           recommendedResults[category.title] = data.items;
         }
       }
-      
+
       setRecommendedBooks(recommendedResults);
-      console.log(recommendedResults);
     } catch (error) {
       console.error("Error fetching recommended books:", error);
     } finally {
@@ -86,13 +99,13 @@ export default function HomeMainScreen() {
       setBooks([]);
       return;
     }
-    
+
     setLoading(true);
     try {
       const response = await fetch(
         `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(
           searchQuery
-        )}&maxResults=20`
+        )}&maxResults=20&langRestrict=${i18n.language}`
       );
       const data = await response.json();
       setBooks(data.items || []);
@@ -107,10 +120,12 @@ export default function HomeMainScreen() {
     try {
       const existingBooks = await AsyncStorage.getItem("books");
       const books = existingBooks ? JSON.parse(existingBooks) : [];
-      
+
       // Check if book already exists
-      const bookExists = books.some((existingBook: any) => 
-        existingBook.title.toLowerCase() === book.volumeInfo.title.toLowerCase()
+      const bookExists = books.some(
+        (existingBook: any) =>
+          existingBook.title.toLowerCase() ===
+          book.volumeInfo.title.toLowerCase()
       );
 
       if (bookExists) {
@@ -141,13 +156,13 @@ export default function HomeMainScreen() {
   };
 
   const navigateToBookDetail = (book: Book) => {
-    navigation.navigate('BookDetail', { book } as never);
+    navigation.navigate("BookDetail", { book } as never);
   };
 
   const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return 'https://via.placeholder.com/128x192?text=No+Cover';
+    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
     // Convert http to https and handle zoom parameter
-    return url.replace('http://', 'https://').replace('&edge=curl', '');
+    return url.replace("http://", "https://").replace("&edge=curl", "");
   };
 
   const renderBookItem = ({ item }: { item: Book }) => (
@@ -167,7 +182,7 @@ export default function HomeMainScreen() {
           <Text style={styles.bookAuthor} numberOfLines={1}>
             {item.volumeInfo.authors?.[0] || "Unknown Author"}
           </Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.addButton}
             onPress={(e) => {
               e.stopPropagation();
@@ -175,7 +190,7 @@ export default function HomeMainScreen() {
             }}
           >
             <Ionicons name="add-circle" size={24} color={colors.primary} />
-            <Text style={styles.addButtonText}>Add to Library</Text>
+            <Text style={styles.addButtonText}>{t("add_to_library")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -185,7 +200,11 @@ export default function HomeMainScreen() {
   const renderRecommendedSection = () => (
     <View style={styles.recommendedContainer}>
       {loadingRecommended ? (
-        <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={styles.loader}
+        />
       ) : (
         Object.entries(recommendedBooks).map(([category, categoryBooks]) => (
           <View key={category} style={styles.categorySection}>
@@ -197,13 +216,15 @@ export default function HomeMainScreen() {
               horizontal
               data={categoryBooks}
               renderItem={({ item }) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.recommendedBookItem}
                   onPress={() => navigateToBookDetail(item)}
                 >
                   <Image
                     source={{
-                      uri: getSecureImageUrl(item.volumeInfo.imageLinks?.thumbnail),
+                      uri: getSecureImageUrl(
+                        item.volumeInfo.imageLinks?.thumbnail
+                      ),
                     }}
                     style={styles.recommendedBookCover}
                     resizeMode="cover"
@@ -225,7 +246,7 @@ export default function HomeMainScreen() {
 
   return (
     <Layout
-      title="Book Search"
+      title={t("book_search")}
       rightComponent={<></>}
       menuVisible={false}
       setMenuVisible={() => {}}
@@ -236,7 +257,8 @@ export default function HomeMainScreen() {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search for books..."
+            placeholder={t("search_books_placeholder")}
+            placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
             onSubmitEditing={searchBooks}
@@ -247,7 +269,11 @@ export default function HomeMainScreen() {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            style={styles.loader}
+          />
         ) : books.length > 0 ? (
           <FlatList
             data={books}
@@ -256,7 +282,7 @@ export default function HomeMainScreen() {
             contentContainerStyle={styles.listContainer}
           />
         ) : (
-          <ScrollView 
+          <ScrollView
             contentContainerStyle={styles.scrollContainer}
             showsVerticalScrollIndicator={false}
           >
@@ -358,8 +384,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   categoryTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 18,
     opacity: 0.9,
   },
@@ -369,7 +395,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: colors.textSecondary,
     marginLeft: 6,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   recommendedListContainer: {
     paddingRight: 16,

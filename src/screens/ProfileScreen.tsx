@@ -5,14 +5,16 @@ import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Layout } from "../layout/layout";
 import VersionScreen from "../components/versionScreen";
 import { Book } from "../components/book";
 import { ScrollView } from "react-native-gesture-handler";
 import AddButton from "../components/addButton";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
+  const { t } = useTranslation();
 
   const [totalBooks, setTotalBooks] = useState(0);
   type BookType = {
@@ -31,6 +33,13 @@ export default function ProfileScreen() {
   const [fontsLoaded] = useFonts({
     DancingScript: require("..//..//assets/fonts/DancingScript-Regular.ttf"),
   });
+
+  const [selectedLanguage, setSelectedLanguage] = useState(i18n.language);
+
+  const handleLanguageChange = (language: string) => {
+    setSelectedLanguage(language);
+    i18n.changeLanguage(language);
+  };
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -56,7 +65,7 @@ export default function ProfileScreen() {
           if (storedBooks) {
             const books = JSON.parse(storedBooks);
             setTotalBooks(books.length);
-            setRecentBooks(books.slice(-2).reverse());
+            setRecentBooks(books.slice(-3).reverse());
             setRecentReviews(
               books.filter((book: { review: any }) => book.review).reverse()
             );
@@ -101,18 +110,42 @@ export default function ProfileScreen() {
         contentContainerStyle={{ justifyContent: "center" }}
       >
         <View>
+          <View style={styles.pickerContainer}>
+            <View style={styles.languageSwitcher}>
+              <Text
+                style={[
+                  styles.languageOption,
+                  selectedLanguage === "en" && styles.selectedLanguage,
+                ]}
+                onPress={() => handleLanguageChange("en")}
+              >
+                En
+              </Text>
+              <Text
+                style={[
+                  styles.languageOption,
+                  selectedLanguage === "tr" && styles.selectedLanguage,
+                ]}
+                onPress={() => handleLanguageChange("tr")}
+              >
+                Tr
+              </Text>
+            </View>
+          </View>
           <View style={styles.header}>
-            <Text style={styles.hello}>👋 Hello, </Text>
+            <Text style={styles.hello}>👋 {t("hello")}, </Text>
             <Text style={styles.brand}>KitApper!</Text>
           </View>
         </View>
         <View style={styles.totalReadBook}>
-          <Text style={styles.totalBooks}>You have saved </Text>
-          <Text style={styles.brand}>{totalBooks}</Text>
-          <Text style={styles.totalBooks}> books in total 🥳</Text>
+          <Text style={styles.totalBooks}>
+            {t("saved_books", { count: totalBooks })}
+          </Text>
         </View>
         <View>
-          <Text style={styles.sectionTitleTop}>Recently Saved Books</Text>
+          <Text style={styles.sectionTitleTop}>
+            {t("recently_saved_books")}
+          </Text>
           <View style={styles.featuredBooksContainer}>
             {recentBooks.map((book, index) => (
               <View key={index} style={styles.bookContainer}>
@@ -131,7 +164,7 @@ export default function ProfileScreen() {
           </View>
         </View>
         <View>
-          <Text style={styles.sectionTitle}>Reviews</Text>
+          <Text style={styles.sectionTitle}>{t("reviews")}</Text>
           <FlatList
             nestedScrollEnabled
             data={recentReviews}
@@ -146,7 +179,6 @@ export default function ProfileScreen() {
             style={styles.reviewsList}
           />
         </View>
-
         <VersionScreen />
       </ScrollView>
     </>
@@ -194,7 +226,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   bookContainer: {
-    marginBottom: 20,
+    marginBottom: 10,
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    marginHorizontal: 10, // Add this line to create space between books
   },
   reviewContainer: {
     backgroundColor: colors.backgroundSecondary,
@@ -215,6 +250,7 @@ const styles = StyleSheet.create({
   featuredBooksContainer: {
     flexDirection: "row",
     justifyContent: "center",
+    marginTop: 20,
   },
   reviewsList: {
     maxHeight: 200,
@@ -231,5 +267,31 @@ const styles = StyleSheet.create({
     borderRadius: sizes.borderRadius,
     padding: 10,
     height: 75,
+  },
+  pickerContainer: {
+    alignItems: "flex-end",
+    marginVertical: 1,
+  },
+  languageLabel: {
+    fontSize: sizes.fontSizeSmall,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  languageSwitcher: {
+    flexDirection: "row",
+    justifyContent: "center",
+    backgroundColor: colors.secondary,
+    borderRadius: sizes.borderRadius * 5,
+    padding: 5,
+    width: 80,
+  },
+  languageOption: {
+    padding: 10,
+    borderRadius: sizes.borderRadius * 5,
+    color: colors.black,
+  },
+  selectedLanguage: {
+    backgroundColor: colors.primary,
+    color: colors.white,
   },
 });
