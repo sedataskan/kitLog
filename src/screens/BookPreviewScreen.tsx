@@ -49,6 +49,13 @@ export default function BookPreviewScreen() {
   const [bookStatus, setBookStatus] = useState(book.status);
   const [open, setOpen] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [parsedBook, setParsedBook] = useState({
+    ...book,
+    saveDate: new Date(book.saveDate),
+    status: book.status ? book.status : t("to_read"),
+    favPage: book.favPage ? book.favPage : 0,
+    currentPage: Number(book.currentPage) || 0,
+  });
 
   const getSecureImageUrl = (url: string | undefined) => {
     if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
@@ -77,14 +84,6 @@ export default function BookPreviewScreen() {
       </Layout>
     );
   }
-
-  const parsedBook = {
-    ...book,
-    saveDate: new Date(book.saveDate),
-    status: book.status ? book.status : t("to_read"),
-    favPage: book.favPage ? book.favPage : 0,
-    currentPage: Number(book.currentPage) || 0,
-  };
 
   const handleEdit = () => {
     setMenuVisible(false);
@@ -124,6 +123,10 @@ export default function BookPreviewScreen() {
 
   const handleStatusChange = async (newStatusKey: string) => {
     setBookStatus(newStatusKey);
+    setParsedBook((prevBook) => ({
+      ...prevBook,
+      status: newStatusKey,
+    }));
     try {
       const existingBooks = await AsyncStorage.getItem("books");
       const books = existingBooks ? JSON.parse(existingBooks) : [];

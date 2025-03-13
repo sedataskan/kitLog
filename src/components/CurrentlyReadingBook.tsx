@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useTranslation } from "react-i18next";
+import { ProgressBar } from "react-native-paper";
 
 type RootStackParamList = {
   BookPreview: {
@@ -109,6 +110,11 @@ export const CurrentlyReadingBook = ({
                 {t("current_page")}: {currentPage}
               </Text>
             </View>
+            <ProgressBar
+              progress={currentPage ? currentPage / parseInt(pages) : 0}
+              color={colors.textSecondary}
+              style={styles.progressBar}
+            />
           </View>
         </View>
       </View>
@@ -171,5 +177,10 @@ const styles = StyleSheet.create({
     color: colors.white,
     opacity: 0.9,
     marginLeft: 4,
+  },
+  progressBar: {
+    height: 6,
+    borderRadius: 3,
+    marginTop: 10,
   },
 });
