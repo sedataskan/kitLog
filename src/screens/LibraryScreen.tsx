@@ -3,7 +3,6 @@ import {
   ScrollView,
   View,
   TouchableOpacity,
-  Dimensions,
   Text,
 } from "react-native";
 import { Layout } from "../layout/layout";
@@ -36,6 +35,7 @@ export default function LibraryScreen() {
       status: string;
       favPage?: number;
       favPageImage?: string;
+      currentPage?: number;
     }[]
   >([]);
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
@@ -99,6 +99,7 @@ export default function LibraryScreen() {
     status: string;
     favPage?: number;
     favPageImage?: string;
+    currentPage?: number;
   }) => {
     setBooks((prevBooks) => {
       const updatedBooks = [newBook, ...prevBooks];
@@ -110,9 +111,7 @@ export default function LibraryScreen() {
   const isFilterActive =
     filters.status !== "" || filters.rating !== 0 || filters.name !== "";
   const currentlyReadingBooks = books.filter(
-    (book) =>
-      book.status.toLowerCase() === "currently reading" ||
-      book.status.toLowerCase() === "şu an okuyorum"
+    (book) => book.status.toLowerCase() === "currently_reading"
   );
 
   return (
@@ -170,6 +169,7 @@ export default function LibraryScreen() {
                   status={book.status}
                   favPage={book.favPage}
                   favPageImage={book.favPageImage}
+                  currentPage={book.currentPage}
                 />
               ))}
             </ScrollView>
@@ -210,6 +210,7 @@ export default function LibraryScreen() {
                   status={book.status}
                   favPage={book.favPage}
                   favPageImage={book.favPageImage}
+                  currentPage={book.currentPage}
                 />
               ))}
           </View>

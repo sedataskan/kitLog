@@ -7,7 +7,6 @@ import {
   Button,
   Image,
   TouchableOpacity,
-  Modal,
 } from "react-native";
 import { Layout } from "../layout/layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,11 +16,11 @@ import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scrol
 import { ScrollView } from "react-native-gesture-handler";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
-import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { StarRating } from "../components/StarRating";
 import { useTranslation } from "react-i18next";
+import DropDownPicker from "react-native-dropdown-picker";
 
 type AddBookScreenRouteProp = RouteProp<
   {
@@ -50,8 +49,9 @@ export default function AddBookScreen({
   const [error, setError] = useState("");
   const [errorFields, setErrorFields] = useState<string[]>([]);
   const [status, setStatus] = useState("");
-  const [isPickerVisible, setPickerVisible] = useState(false);
   const [showAdditionalFields, setShowAdditionalFields] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     if (isEdit && book) {
@@ -65,6 +65,7 @@ export default function AddBookScreen({
       setStatus(book.status);
       setFavPageImage(book.favPageImage);
       setFavPage(book.favPage);
+      setCurrentPage(book.currentPage);
     }
   }, [isEdit, book]);
 
@@ -91,11 +92,17 @@ export default function AddBookScreen({
       favPage,
       saveDate: new Date(),
       status,
+      currentPage: currentPage ?? 0,
     };
 
     try {
       const existingBooks = await AsyncStorage.getItem("books");
-      const books = existingBooks ? JSON.parse(existingBooks) : [];
+      let books = existingBooks ? JSON.parse(existingBooks) : [];
+
+      books = books.map((b: any) => ({
+        ...b,
+        currentPage: Number(b.currentPage),
+      }));
       if (isEdit) {
         const updatedBooks = books.map((b: any) =>
           b.title === book.title ? newBook : b
@@ -103,6 +110,7 @@ export default function AddBookScreen({
         await AsyncStorage.setItem("books", JSON.stringify(updatedBooks));
         alert(t("book_updated_successfully"));
       } else {
+        newBook.currentPage = Number(newBook.currentPage);
         books.push(newBook);
         await AsyncStorage.setItem("books", JSON.stringify(books));
         alert(t("book_saved_successfully"));
@@ -119,6 +127,7 @@ export default function AddBookScreen({
       setStatus("");
       setFavPageImage("");
       setFavPage(0);
+      setCurrentPage(0);
       onBookAdded(newBook);
       navigation.navigate("BookPreview" as never, {
         book: newBook,
@@ -180,6 +189,39 @@ export default function AddBookScreen({
     }
   };
 
+  const getStatusLabel = (statusKey: string) => {
+    switch (statusKey) {
+      case "read":
+        return t("read");
+      case "to_read":
+        return t("to_read");
+      case "currently_reading":
+        return t("currently_reading");
+    }
+  };
+
+  const handleStatusChange = async (newStatusKey: string) => {
+    setStatus(newStatusKey);
+    if (book) {
+      try {
+        const existingBooks = await AsyncStorage.getItem("books");
+        const books = existingBooks ? JSON.parse(existingBooks) : [];
+        const updatedBooks = books.map((b: any) =>
+          b.title === book.title ? { ...b, status: newStatusKey } : b
+        );
+        await AsyncStorage.setItem("books", JSON.stringify(updatedBooks));
+      } catch (error) {
+        console.error("Error updating book status", error);
+      }
+    }
+  };
+
+  const items = [
+    { label: t("read"), value: "read" },
+    { label: t("to_read"), value: "to_read" },
+    { label: t("currently_reading"), value: "currently_reading" },
+  ];
+
   return (
     <Layout title={isEdit ? t("edit_book") : t("add_book")} canGoBack={true}>
       <ScrollView contentContainerStyle={styles.scrollView}>
@@ -225,22 +267,47 @@ export default function AddBookScreen({
                 <Text style={styles.label}>
                   {t("status")} <Text style={styles.mandatory}>*</Text>
                 </Text>
-                <TouchableOpacity
-                  style={styles.dropdown}
-                  onPress={() => setPickerVisible(true)}
-                >
-                  <Text style={styles.dropdownText}>
-                    {status || t("select_status")}
-                  </Text>
-                </TouchableOpacity>
+                <DropDownPicker
+                  open={open}
+                  value={status}
+                  items={items}
+                  setOpen={setOpen}
+                  setValue={(callback) => {
+                    const newStatusKey = callback(status);
+                    setStatus(newStatusKey);
+                    handleStatusChange(newStatusKey);
+                  }}
+                  setItems={() => {}}
+                  style={styles.statusDropdown}
+                  dropDownContainerStyle={{
+                    backgroundColor: colors.background,
+                    borderColor: colors.secondary,
+                  }}
+                  selectedItemContainerStyle={{
+                    backgroundColor: colors.backgroundSecondary,
+                  }}
+                  placeholder={getStatusLabel(status)}
+                />
               </View>
-
-              {status === t("read") && (
+              {status === "read" && (
                 <View style={[styles.inputContainer, styles.ratingContainer]}>
                   <StarRating
                     rating={rating}
                     onRatingChange={(value) => setRating(value)}
                     size={sizes.fontSizeLarge * 1.3}
+                  />
+                </View>
+              )}
+              {status === "currently_reading" && (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>{t("current_page")}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={currentPage.toString()}
+                    onChangeText={(text) => {
+                      setCurrentPage(text);
+                    }}
+                    keyboardType="numeric"
                   />
                 </View>
               )}
@@ -352,34 +419,6 @@ export default function AddBookScreen({
           </View>
         </KeyboardAvoidingScrollView>
       </ScrollView>
-
-      <Modal
-        visible={isPickerVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setPickerVisible(false)}
-      >
-        <View style={styles.bottomPickerContainer}>
-          <View style={styles.pickerHeader}>
-            <Button title={t("done")} onPress={() => setPickerVisible(false)} />
-          </View>
-          <Picker
-            selectedValue={status}
-            onValueChange={(itemValue) => {
-              setStatus(itemValue);
-            }}
-            style={styles.picker}
-            itemStyle={styles.dropdownText}
-          >
-            <Picker.Item label={t("to_read")} value={t("to_read")} />
-            <Picker.Item label={t("read")} value={t("read")} />
-            <Picker.Item
-              label={t("currently_reading")}
-              value={t("currently_reading")}
-            />
-          </Picker>
-        </View>
-      </Modal>
     </Layout>
   );
 }
@@ -444,36 +483,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: sizes.fontSizeSmall,
   },
-  dropdown: {
+  statusDropdown: {
     width: "100%",
-    padding: 10,
+    backgroundColor: colors.background,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.secondary,
-    borderRadius: 5,
-    justifyContent: "center",
-  },
-  dropdownText: {
-    color: colors.textPrimary,
-  },
-  bottomPickerContainer: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-  },
-  pickerHeader: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.secondary,
-  },
-  picker: {
-    width: "100%",
-    backgroundColor: colors.background,
-    borderRadius: 5,
   },
   backButton: {
     fontSize: sizes.fontSizeLarge,

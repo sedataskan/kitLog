@@ -21,6 +21,7 @@ type RootStackParamList = {
       status: string;
       favPage?: number;
       favPageImage?: string;
+      currentPage?: number;
     };
   };
 };
@@ -31,15 +32,12 @@ type BookScreenNavigationProp = StackNavigationProp<
 >;
 
 const getStatusIcon = (status: string) => {
-  switch (status.toLowerCase()) {
+  switch (status) {
     case "read":
-    case "okudum":
       return "checkmark-circle";
-    case "to read":
-    case "okunacak":
+    case "to_read":
       return "time";
-    case "currently reading":
-    case "şu an okuyorum":
+    case "currently_reading":
       return "book";
     default:
       return "help-circle";
@@ -57,6 +55,7 @@ export const Book = ({
   status,
   favPage,
   favPageImage,
+  currentPage,
   style,
 }: {
   title: string;
@@ -69,6 +68,7 @@ export const Book = ({
   status: string;
   favPage?: number;
   favPageImage?: string;
+  currentPage?: number;
   style?: object;
 }) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
@@ -94,6 +94,7 @@ export const Book = ({
         status,
         favPage,
         favPageImage,
+        currentPage: currentPage ?? 0,
       },
     });
   };
@@ -113,7 +114,7 @@ export const Book = ({
           style={styles.image}
         />
       </View>
-      <Text style={styles.title} numberOfLines={2}>
+      <Text style={styles.title} numberOfLines={1}>
         {title}
       </Text>
       <Text style={styles.author} numberOfLines={1}>
@@ -164,16 +165,18 @@ const styles = StyleSheet.create({
     borderRadius: sizes.borderRadius,
   },
   title: {
-    fontSize: sizes.fontSizeMedium,
+    fontSize: sizes.fontSizeSmall,
     fontWeight: "bold",
     color: colors.textPrimary,
     marginTop: 8,
     marginBottom: 4,
     maxWidth: 105,
+    overflow: "hidden",
   },
   author: {
     fontSize: sizes.fontSizeSmall,
     color: colors.textSecondary,
     maxWidth: 105,
+    overflow: "hidden",
   },
 });

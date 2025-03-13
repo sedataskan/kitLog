@@ -31,8 +31,6 @@ type BookDetailScreenRouteProp = RouteProp<
           publisher?: string;
           publishedDate?: string;
           categories?: string[];
-          favPageImage?: string;
-          favPageNumber?: string;
           status?: string;
         };
       };
