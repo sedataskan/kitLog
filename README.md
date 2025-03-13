@@ -1,5 +1,5 @@
-# kitApp
-
+[![preview](https://github.com/sedataskan/kitApp/actions/workflows/preview.yml/badge.svg)](https://github.com/sedataskan/kitApp/actions/workflows/preview.yml)
+ # kitApp 
 <p align="center">
     kitApp is a mobile application that allows users to manage their own library.
 </p>
