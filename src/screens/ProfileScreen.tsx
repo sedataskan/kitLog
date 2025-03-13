@@ -226,10 +226,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   bookContainer: {
-    marginBottom: 10,
     justifyContent: "space-evenly",
     alignItems: "center",
-    marginHorizontal: 10, // Add this line to create space between books
+    marginHorizontal: 10,
   },
   reviewContainer: {
     backgroundColor: colors.backgroundSecondary,

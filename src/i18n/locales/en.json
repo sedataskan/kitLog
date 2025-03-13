@@ -82,5 +82,6 @@
   "turkish": "Turkish",
   "tap_to_change_fav_page_image": "Tap to change favorite page image",
   "favPage": "Favorite Page",
-  "favPageNumber": "Favorite Page Number"
+  "favPageNumber": "Favorite Page Number",
+  "current_page": "Current Page"
 }

@@ -59,11 +59,19 @@ export default function HomeMainScreen() {
     { title: t("classic_literature"), query: "subject:classic+literature" },
     { title: t("science_technology"), query: "subject:science+technology" },
     { title: t("personal_development"), query: "subject:self-help" },
+    { title: t("history"), query: "subject:history" },
+    { title: t("biographies"), query: "subject:biography" },
+    { title: t("romance"), query: "subject:romance" },
+    { title: t("fantasy"), query: "subject:fantasy" },
   ];
 
   useEffect(() => {
     fetchRecommendedBooks();
   }, []);
+
+  useEffect(() => {
+    fetchRecommendedBooks();
+  }, [i18n.language]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -121,7 +129,6 @@ export default function HomeMainScreen() {
       const existingBooks = await AsyncStorage.getItem("books");
       const books = existingBooks ? JSON.parse(existingBooks) : [];
 
-      // Check if book already exists
       const bookExists = books.some(
         (existingBook: any) =>
           existingBook.title.toLowerCase() ===
@@ -161,7 +168,6 @@ export default function HomeMainScreen() {
 
   const getSecureImageUrl = (url: string | undefined) => {
     if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
-    // Convert http to https and handle zoom parameter
     return url.replace("http://", "https://").replace("&edge=curl", "");
   };
 

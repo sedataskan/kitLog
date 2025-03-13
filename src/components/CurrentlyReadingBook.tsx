@@ -5,6 +5,7 @@ import { sizes } from "../constants/sizes";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { useTranslation } from "react-i18next";
 
 type RootStackParamList = {
   BookPreview: {
@@ -20,6 +21,7 @@ type RootStackParamList = {
       status: string;
       favPage?: number;
       favPageImage?: string;
+      currentPage?: number;
     };
   };
 };
@@ -40,6 +42,7 @@ type CurrentlyReadingBookProps = {
   status: string;
   favPage?: number;
   favPageImage?: string;
+  currentPage?: number;
 };
 
 const getSecureImageUrl = (url: string | undefined) => {
@@ -58,9 +61,10 @@ export const CurrentlyReadingBook = ({
   status,
   favPage,
   favPageImage,
+  currentPage,
 }: CurrentlyReadingBookProps) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
-
+  const { t } = useTranslation();
   const handlePress = () => {
     navigation.navigate("BookPreview", {
       book: {
@@ -75,6 +79,7 @@ export const CurrentlyReadingBook = ({
         status,
         favPage,
         favPageImage,
+        currentPage: currentPage !== undefined ? currentPage : 0,
       },
     });
   };
@@ -100,7 +105,9 @@ export const CurrentlyReadingBook = ({
             </Text>
             <View style={styles.iconContainer}>
               <Ionicons name="book-outline" size={16} color={colors.white} />
-              <Text style={styles.pagesText}>{pages} pages</Text>
+              <Text style={styles.pagesText}>
+                {t("current_page")}: {currentPage}
+              </Text>
             </View>
           </View>
         </View>

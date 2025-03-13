@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Text, Image, ScrollView, Alert } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Image,
+  ScrollView,
+  Alert,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
 import { Layout } from "../layout/layout";
 import DropDownPicker from "react-native-dropdown-picker";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
@@ -24,6 +33,7 @@ type BookPreviewScreenRouteProp = RouteProp<
         status: string;
         favPage?: number;
         favPageImage?: string;
+        currentPage?: number;
       };
     };
   },
@@ -38,10 +48,22 @@ export default function BookPreviewScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [bookStatus, setBookStatus] = useState(book.status);
   const [open, setOpen] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const getSecureImageUrl = (url: string | undefined) => {
     if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
     return url.replace("http://", "https://").replace("&edge=curl", "");
+  };
+
+  const getStatusLabel = (statusKey: string) => {
+    switch (statusKey) {
+      case "read":
+        return t("read");
+      case "to_read":
+        return t("to_read");
+      case "currently_reading":
+        return t("currently_reading");
+    }
   };
 
   if (!book) {
@@ -61,6 +83,7 @@ export default function BookPreviewScreen() {
     saveDate: new Date(book.saveDate),
     status: book.status ? book.status : t("to_read"),
     favPage: book.favPage ? book.favPage : 0,
+    currentPage: Number(book.currentPage) || 0,
   };
 
   const handleEdit = () => {
@@ -99,25 +122,30 @@ export default function BookPreviewScreen() {
     ]);
   };
 
-  const handleStatusChange = async (newStatus: string) => {
-    setBookStatus(newStatus);
+  const handleStatusChange = async (newStatusKey: string) => {
+    setBookStatus(newStatusKey);
     try {
       const existingBooks = await AsyncStorage.getItem("books");
       const books = existingBooks ? JSON.parse(existingBooks) : [];
-      const updatedBooks = books.map((b: any) =>
-        b.title === book.title ? { ...b, status: newStatus } : b
-      );
+      const updatedBooks = books.map((b: any) => {
+        return {
+          ...b,
+          currentPage: Number(b?.currentPage),
+          status: b.title === book.title ? newStatusKey : b.status,
+        };
+      });
       await AsyncStorage.setItem("books", JSON.stringify(updatedBooks));
     } catch (error) {
       console.error("Error updating book status", error);
     }
   };
 
-  const [items, setItems] = useState([
-    { label: t("read"), value: t("read") },
-    { label: t("to_read"), value: t("to_read") },
-    { label: t("currently_reading"), value: t("currently_reading") },
-  ]);
+  const items = [
+    { label: t("read"), value: "read" },
+    { label: t("to_read"), value: "to_read" },
+    { label: t("currently_reading"), value: "currently_reading" },
+  ];
+
   return (
     <Layout
       canGoBack={true}
@@ -163,14 +191,20 @@ export default function BookPreviewScreen() {
             items={items}
             setOpen={setOpen}
             setValue={(callback) => {
-              const newStatus = callback(bookStatus);
-              setBookStatus(newStatus);
-              handleStatusChange(newStatus);
+              const newStatusKey = callback(bookStatus);
+              setBookStatus(newStatusKey);
+              handleStatusChange(newStatusKey);
             }}
-            setItems={setItems}
-            style={styles.status}
-            containerStyle={{ width: "100%" }}
-            dropDownContainerStyle={{ backgroundColor: colors.background }}
+            setItems={() => {}}
+            style={styles.statusDropdown}
+            dropDownContainerStyle={{
+              backgroundColor: colors.background,
+              borderColor: colors.secondary,
+            }}
+            selectedItemContainerStyle={{
+              backgroundColor: colors.backgroundSecondary,
+            }}
+            placeholder={getStatusLabel(bookStatus)}
           />
         </View>
         <View style={styles.textContainer}>
@@ -193,6 +227,12 @@ export default function BookPreviewScreen() {
                 <Text style={styles.value}>{parsedBook.review}</Text>
               </>
             )}
+            {parsedBook.status === "currently_reading" && (
+              <>
+                <Text style={styles.label}>{t("current_page")}</Text>
+                <Text style={styles.value}>{parsedBook.currentPage}</Text>
+              </>
+            )}
             {parsedBook.favPageImage && (
               <>
                 <Text style={styles.label}>
@@ -207,10 +247,31 @@ export default function BookPreviewScreen() {
                     {parsedBook.favPage ? parsedBook.favPage : "-"}
                   </Text>
                 </Text>
-                <Image
-                  source={{ uri: getSecureImageUrl(parsedBook.favPageImage) }}
-                  style={styles.favPageImage}
-                />
+                <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+                  <Image
+                    source={{ uri: getSecureImageUrl(parsedBook.favPageImage) }}
+                    style={styles.favPageImage}
+                  />
+                </TouchableOpacity>
+                <Modal
+                  visible={isModalVisible}
+                  transparent={true}
+                  onRequestClose={() => setIsModalVisible(false)}
+                >
+                  <View style={styles.modalContainer}>
+                    <TouchableOpacity
+                      style={styles.modalBackground}
+                      onPress={() => setIsModalVisible(false)}
+                    >
+                      <Image
+                        source={{
+                          uri: getSecureImageUrl(parsedBook.favPageImage),
+                        }}
+                        style={styles.modalImage}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </Modal>
               </>
             )}
           </View>
@@ -298,6 +359,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  statusDropdown: {
+    width: "100%",
+    backgroundColor: colors.background,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+  },
   errorText: {
     color: colors.error,
     fontSize: sizes.fontSizeMedium,
@@ -325,5 +393,22 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.blur,
+  },
+  modalBackground: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalImage: {
+    width: "90%",
+    height: "90%",
+    resizeMode: "contain",
   },
 });
