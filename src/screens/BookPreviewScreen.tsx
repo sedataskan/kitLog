@@ -58,8 +58,8 @@ export default function BookPreviewScreen() {
   });
 
   const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
-    return url.replace("http://", "https://").replace("&edge=curl", "");
+    if (url)
+      return url.replace("http://", "https://").replace("&edge=curl", "");
   };
 
   const getStatusLabel = (statusKey: string) => {
@@ -165,8 +165,12 @@ export default function BookPreviewScreen() {
         <Image
           source={
             parsedBook.image
-              ? { uri: getSecureImageUrl(parsedBook.image) }
-              : require("../../assets/images/unknownBook.jpg")
+              ? {
+                  uri: getSecureImageUrl(parsedBook.image)
+                    ? getSecureImageUrl(parsedBook.image)
+                    : require("../../assets/images/noCover.jpg"),
+                }
+              : require("../../assets/images/noCover.jpg")
           }
           style={styles.image}
         />
@@ -252,7 +256,11 @@ export default function BookPreviewScreen() {
                 </Text>
                 <TouchableOpacity onPress={() => setIsModalVisible(true)}>
                   <Image
-                    source={{ uri: getSecureImageUrl(parsedBook.favPageImage) }}
+                    source={{
+                      uri: getSecureImageUrl(parsedBook.favPageImage)
+                        ? getSecureImageUrl(parsedBook.favPageImage)
+                        : require("../../assets/images/noCover.jpg"),
+                    }}
                     style={styles.favPageImage}
                   />
                 </TouchableOpacity>
@@ -268,7 +276,9 @@ export default function BookPreviewScreen() {
                     >
                       <Image
                         source={{
-                          uri: getSecureImageUrl(parsedBook.favPageImage),
+                          uri: getSecureImageUrl(parsedBook.favPageImage)
+                            ? getSecureImageUrl(parsedBook.favPageImage)
+                            : require("../../assets/images/noCover.jpg"),
                         }}
                         style={styles.modalImage}
                       />

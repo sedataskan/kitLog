@@ -215,7 +215,7 @@ export default function HomeMainScreen() {
         Object.entries(recommendedBooks).map(([category, categoryBooks]) => (
           <View key={category} style={styles.categorySection}>
             <View style={styles.categoryTitle}>
-              <Ionicons name="book" size={22} color={colors.primary} />
+              <Ionicons name="book" size={22} color={colors.slider} />
               <Text style={styles.categoryTitleText}>{category}</Text>
             </View>
             <FlatList

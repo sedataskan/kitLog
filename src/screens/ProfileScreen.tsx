@@ -11,6 +11,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import AddButton from "../components/addButton";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -143,9 +144,10 @@ export default function ProfileScreen() {
           </Text>
         </View>
         <View>
-          <Text style={styles.sectionTitleTop}>
-            {t("recently_saved_books")}
-          </Text>
+          <View style={styles.title}>
+            <Ionicons name="book" size={22} color={colors.slider} />
+            <Text style={styles.sectionTitle}>{t("recently_saved_books")}</Text>
+          </View>
           <View style={styles.featuredBooksContainer}>
             {recentBooks.map((book, index) => (
               <View key={index} style={styles.bookContainer}>
@@ -164,7 +166,10 @@ export default function ProfileScreen() {
           </View>
         </View>
         <View>
-          <Text style={styles.sectionTitle}>{t("reviews")}</Text>
+          <View style={styles.title}>
+            <Ionicons name="reader" size={22} color={colors.slider} />
+            <Text style={styles.sectionTitle}>{t("reviews")}</Text>
+          </View>
           <FlatList
             nestedScrollEnabled
             data={recentReviews}
@@ -216,12 +221,15 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: sizes.fontSizeMedium,
-    fontWeight: "bold",
     alignSelf: "flex-start",
+    letterSpacing: 0.3,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    marginLeft: 6,
+    textTransform: "uppercase",
   },
   sectionTitleTop: {
     fontSize: sizes.fontSizeMedium,
-    fontWeight: "bold",
     alignSelf: "flex-start",
     marginTop: 20,
   },
@@ -239,7 +247,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   reviewBook: {
-    fontWeight: "bold",
     fontSize: sizes.fontSizeSmall,
   },
   reviewText: {
@@ -249,12 +256,12 @@ const styles = StyleSheet.create({
   featuredBooksContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   reviewsList: {
     maxHeight: 200,
-    marginTop: 15,
     marginBottom: 20,
+    marginTop: 10,
   },
 
   totalReadBook: {
@@ -270,17 +277,17 @@ const styles = StyleSheet.create({
   pickerContainer: {
     alignItems: "flex-end",
     marginVertical: 1,
+    justifyContent: "center",
   },
   languageLabel: {
     fontSize: sizes.fontSizeSmall,
-    fontWeight: "bold",
     marginBottom: 10,
   },
   languageSwitcher: {
     flexDirection: "row",
     justifyContent: "center",
     backgroundColor: colors.secondary,
-    borderRadius: sizes.borderRadius * 5,
+    borderRadius: 1000,
     padding: 5,
     width: 80,
   },
@@ -292,5 +299,10 @@ const styles = StyleSheet.create({
   selectedLanguage: {
     backgroundColor: colors.primary,
     color: colors.white,
+  },
+  title: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
   },
 });

@@ -146,7 +146,7 @@ export default function LibraryScreen() {
         {!isFilterActive && currentlyReadingBooks.length > 0 && (
           <View style={styles.currentlyReadingSection}>
             <View style={styles.sectionTitleContainer}>
-              <Ionicons name="book" size={22} color={colors.primary} />
+              <Ionicons name="book" size={22} color={colors.slider} />
               <Text style={styles.sectionTitleText}>
                 {t("currently_reading")}
               </Text>
@@ -177,7 +177,7 @@ export default function LibraryScreen() {
         )}
         <View style={styles.bookshelfSection}>
           <View style={styles.bookshelfTitleContainer}>
-            <Ionicons name="library" size={20} color={colors.primary} />
+            <Ionicons name="library" size={20} color={colors.slider} />
             <Text style={styles.bookshelfTitleText}>{t("bookshelf")}</Text>
             <Text style={styles.bookCount}>
               {
@@ -202,7 +202,7 @@ export default function LibraryScreen() {
                   key={index}
                   title={book.title}
                   author={book.author}
-                  image={book.image}
+                  image={book.image || ""}
                   pages={book.pages}
                   publication={book.publication}
                   review={book.review || ""}

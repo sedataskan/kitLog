@@ -85,7 +85,9 @@ export const Book = ({
       book: {
         title,
         author,
-        image: getSecureImageUrl(image),
+        image: getSecureImageUrl(image)
+          ? getSecureImageUrl(image)
+          : require("../../assets/images/noCover.jpg"),
         pages,
         publication,
         review,
@@ -108,8 +110,12 @@ export const Book = ({
         <Image
           source={
             image
-              ? { uri: getSecureImageUrl(image) }
-              : require("../../assets/images/unknownBook.jpg")
+              ? {
+                  uri: getSecureImageUrl(image)
+                    ? getSecureImageUrl(image)
+                    : require("../../assets/images/noCover.jpg"),
+                }
+              : require("../../assets/images/noCover.jpg")
           }
           style={styles.image}
         />

@@ -9,7 +9,7 @@
       "policy": "sdkVersion"
     },
     "orientation": "portrait",
-    "icon": "./assets/images/KITAPP.png",
+    "icon": "./assets/images/kitlog.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -24,20 +24,20 @@
       }
     },
     "splash": {
-      "image": "./assets/images/KITAPP.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#4B6E7C"
+      "image": "./assets/images/kitlog.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#CAAFC833"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/KITAPP.png",
-        "backgroundColor": "#4B6E7C"
+        "foregroundImage": "./assets/images/kitlog.png",
+        "backgroundColor": "#CAAFC833"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/KITAPP.png"
+      "favicon": "./assets/images/kitlog.png"
     },
     "extra": {
       "eas": {

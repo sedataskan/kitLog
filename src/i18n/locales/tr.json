@@ -1,6 +1,6 @@
 {
   "hello": "Merhaba",
-  "saved_books": "Toplamda {{count}} kitap kaydettiniz 🥳",
+  "saved_books": "Toplamda {{count}} kitap kaydettin 🥳",
   "recently_saved_books": "Son Kaydedilen Kitaplar",
   "reviews": "Yorumlar",
   "add_book": "Kitap Ekle",

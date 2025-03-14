@@ -92,7 +92,7 @@ export const CurrentlyReadingBook = ({
           source={
             image
               ? { uri: getSecureImageUrl(image) }
-              : require("../../assets/images/unknownBook.jpg")
+              : require("../../assets/images/noCover.jpg")
           }
           style={styles.image}
         />
@@ -112,7 +112,7 @@ export const CurrentlyReadingBook = ({
             </View>
             <ProgressBar
               progress={currentPage ? currentPage / parseInt(pages) : 0}
-              color={colors.textSecondary}
+              color={colors.sliderSecondary}
               style={styles.progressBar}
             />
           </View>

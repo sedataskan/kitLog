@@ -236,7 +236,7 @@ export default function AddBookScreen({
                 source={
                   image
                     ? { uri: image }
-                    : require("../../assets/images/unknownBook.jpg")
+                    : require("../../assets/images/noCover.jpg")
                 }
                 style={styles.image}
                 resizeMode="cover"
@@ -395,7 +395,7 @@ export default function AddBookScreen({
                   source={
                     favPageImage
                       ? { uri: favPageImage }
-                      : require("../../assets/images/unknownBook.jpg")
+                      : require("../../assets/images/noCover.jpg")
                   }
                   style={styles.image}
                   resizeMode="cover"
@@ -412,7 +412,7 @@ export default function AddBookScreen({
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <View style={styles.button}>
             <Button
-              color={colors.primary}
+              color={colors.white}
               title={t("save")}
               onPress={handleSave}
             />
@@ -475,8 +475,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: 150,
     borderRadius: sizes.borderRadius,
-    borderWidth: 2,
-    borderColor: colors.secondary,
+    backgroundColor: colors.primary,
   },
   error: {
     color: colors.error,
