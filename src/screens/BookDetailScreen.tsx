@@ -12,7 +12,7 @@ import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { CustomDropDownPicker } from "../components/CustomDropDownPicker";
 import { getSecureImageUrl } from "../util/getSecureImageUrl";
@@ -40,11 +40,8 @@ type BookDetailScreenRouteProp = RouteProp<
   "params"
 >;
 
-export default function BookDetailScreen({
-  route,
-}: {
-  route: BookDetailScreenRouteProp;
-}) {
+export default function BookDetailScreen() {
+  const route = useRoute<BookDetailScreenRouteProp>();
   const { book } = route.params;
   const navigation = useNavigation();
   const { t } = useTranslation();

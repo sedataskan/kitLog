@@ -190,7 +190,6 @@ export const FilterModal = ({
                   value={bookStatus}
                   setOpen={setOpen}
                   setValue={setBookStatus}
-                  onChangeValue={(value) => setStatus(value)}
                 />
               </View>
 

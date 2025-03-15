@@ -16,9 +16,9 @@ import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Book } from "../components/Book";
-import { AddButton } from "../components/AddButton";
-import { FilterModal } from "../components/FilterModal";
+import { AddButton } from "../components/addButton";
+import { Book } from "../components/book";
+import { FilterModal } from "../components/filterModal";
 
 export default function LibraryScreen() {
   const navigation = useNavigation();

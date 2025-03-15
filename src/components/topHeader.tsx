@@ -25,8 +25,11 @@ export const TopHeader = ({
   canGoBack?: boolean;
 }) => {
   const navigation = useNavigation();
-  const route = useRoute();
-
+  const route = useRoute<{
+    key: string;
+    name: string;
+    params: { book?: any };
+  }>();
   const isAddBookPage = route.name === "AddBook";
   const isBookPreviewPage = route.name === "BookPreview";
 

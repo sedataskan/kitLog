@@ -11,6 +11,7 @@ import { CustomDropDownPicker } from "../components/CustomDropDownPicker";
 import { StarRating } from "../components/StarRating";
 import { CurrentPageSection } from "../components/CurrentPageSection";
 import { FavImageSection } from "../components/FavImageSection";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 type BookPreviewScreenRouteProp = RouteProp<
   {
@@ -33,9 +34,21 @@ type BookPreviewScreenRouteProp = RouteProp<
   "params"
 >;
 
+type RootStackParamList = {
+  BookPreview: { book: any };
+  AddBook: { onBookAdded?: (book: any) => void; book?: any; isEdit?: boolean };
+  book: { book: any };
+};
+
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList {}
+  }
+}
+
 export default function BookPreviewScreen() {
   const route = useRoute<BookPreviewScreenRouteProp>();
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
   const { book } = route.params;
   const [menuVisible, setMenuVisible] = useState(false);

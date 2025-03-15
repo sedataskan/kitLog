@@ -3,20 +3,45 @@ import React, { useEffect, useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  useFocusEffect,
+} from "@react-navigation/native";
+import { RouteProp } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import VersionScreen from "../components/versionScreen";
-import { Book } from "../components/Book";
+import { Book } from "../components/book";
 import { ScrollView } from "react-native-gesture-handler";
-import { AddButton } from "../components/AddButton";
+import { AddButton } from "../components/addButton";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { Ionicons } from "@expo/vector-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type ProfileScreenRouteProp = RouteProp<
+  {
+    params: { onBookAdded: (book: any) => void; book?: any; isEdit?: boolean };
+  },
+  "params"
+>;
+
+type RootStackParamList = {
+  BookPreview: { book: any };
+  AddBook: { onBookAdded: (book: any) => void };
+};
+
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList {}
+  }
+}
 
 export default function ProfileScreen() {
-  const navigation = useNavigation();
+  const route = useRoute<ProfileScreenRouteProp>();
+  const { onBookAdded = () => {}, book, isEdit } = route.params || {};
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { t } = useTranslation();
-
   const [totalBooks, setTotalBooks] = useState(0);
   type BookType = {
     title: string;
@@ -36,7 +61,7 @@ export default function ProfileScreen() {
   });
 
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language);
-  const slideAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(32)).current;
 
   const handleLanguageChange = (language: string) => {
     Animated.timing(slideAnim, {
@@ -108,9 +133,9 @@ export default function ProfileScreen() {
     <>
       <AddButton
         onPress={() =>
-          navigation.navigate("AddBook" as never, {
+          navigation.navigate("AddBook", {
             onBookAdded: handleBookAdded,
-          })
+          } as { onBookAdded: any })
         }
       />
       <ScrollView
@@ -253,6 +278,7 @@ const styles = StyleSheet.create({
   },
   reviewBook: {
     fontSize: sizes.fontSizeSmall,
+    fontWeight: "bold",
   },
   reviewText: {
     marginTop: 8,
@@ -268,7 +294,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 10,
   },
-
   totalReadBook: {
     flexDirection: "row",
     justifyContent: "center",

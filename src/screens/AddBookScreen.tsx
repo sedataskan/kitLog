@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Layout } from "../layout/layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
@@ -21,6 +21,7 @@ import { StarRating } from "../components/StarRating";
 import { useTranslation } from "react-i18next";
 import { CustomDropDownPicker } from "../components/CustomDropDownPicker";
 import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 type AddBookScreenRouteProp = RouteProp<
   {
@@ -29,13 +30,19 @@ type AddBookScreenRouteProp = RouteProp<
   "params"
 >;
 
-export default function AddBookScreen({
-  route,
-}: {
-  route: AddBookScreenRouteProp;
-}) {
+type RootStackParamList = {
+  BookPreview: { book: any };
+};
+
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList {}
+  }
+}
+
+export default function AddBookScreen() {
+  const route = useRoute<AddBookScreenRouteProp>();
   const { onBookAdded = () => {}, book, isEdit } = route.params;
-  const navigation = useNavigation();
   const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -50,6 +57,7 @@ export default function AddBookScreen({
   const [showAdditionalFields, setShowAdditionalFields] = useState(false);
   const [open, setOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     if (isEdit && book) {
@@ -120,9 +128,9 @@ export default function AddBookScreen({
       setStatus("");
       setCurrentPage(0);
       onBookAdded(newBook);
-      navigation.navigate("BookPreview" as never, {
+      navigation.navigate("BookPreview", {
         book: newBook,
-      });
+      } as { book: any });
     } catch (error) {
       console.error("Error saving book", error);
     }
