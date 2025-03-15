@@ -1,22 +1,16 @@
 import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Text,
-  Image,
-  ScrollView,
-  Alert,
-  Modal,
-  TouchableOpacity,
-} from "react-native";
-import { Layout } from "../layout/layout";
-import DropDownPicker from "react-native-dropdown-picker";
+import { View, StyleSheet, Text, Image, ScrollView, Alert } from "react-native";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
-import { StarRating } from "../components/StarRating";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTranslation } from "react-i18next";
+import { getSecureImageUrl } from "../util/getSecureImageUrl";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
-import { useTranslation } from "react-i18next";
+import { Layout } from "../layout/layout";
+import { CustomDropDownPicker } from "../components/CustomDropDownPicker";
+import { StarRating } from "../components/StarRating";
+import { CurrentPageSection } from "../components/CurrentPageSection";
+import { FavImageSection } from "../components/FavImageSection";
 
 type BookPreviewScreenRouteProp = RouteProp<
   {
@@ -29,7 +23,6 @@ type BookPreviewScreenRouteProp = RouteProp<
         review: string;
         rating: number;
         image: string;
-        saveDate: Date;
         status: string;
         favPage?: number;
         favPageImage?: string;
@@ -48,42 +41,19 @@ export default function BookPreviewScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [bookStatus, setBookStatus] = useState(book.status);
   const [open, setOpen] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const safeParseNumber = (value: any, defaultValue: number = 0) => {
+    return !isNaN(Number(value)) && value !== null
+      ? Number(value)
+      : defaultValue;
+  };
+
   const [parsedBook, setParsedBook] = useState({
     ...book,
-    saveDate: new Date(book.saveDate),
     status: book.status ? book.status : t("to_read"),
-    favPage: book.favPage ? book.favPage : 0,
-    currentPage: Number(book.currentPage) || 0,
+    favPage: safeParseNumber(book.favPage, 1),
+    currentPage: safeParseNumber(book.currentPage, 1),
+    image: book.image ? book.image : "",
   });
-
-  const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
-    return url.replace("http://", "https://").replace("&edge=curl", "");
-  };
-
-  const getStatusLabel = (statusKey: string) => {
-    switch (statusKey) {
-      case "read":
-        return t("read");
-      case "to_read":
-        return t("to_read");
-      case "currently_reading":
-        return t("currently_reading");
-    }
-  };
-
-  if (!book) {
-    return (
-      <Layout title={t("book_preview")}>
-        <View style={styles.container}>
-          <Text style={styles.errorText}>
-            {t("book_details_not_available")}
-          </Text>
-        </View>
-      </Layout>
-    );
-  }
 
   const handleEdit = () => {
     setMenuVisible(false);
@@ -91,7 +61,9 @@ export default function BookPreviewScreen() {
       book: {
         ...parsedBook,
         status: bookStatus,
-        saveDate: parsedBook.saveDate.toISOString(),
+        rating: parsedBook.rating,
+        favPage: parsedBook.favPage,
+        currentPage: parsedBook.currentPage,
       },
       isEdit: true,
     });
@@ -133,7 +105,9 @@ export default function BookPreviewScreen() {
       const updatedBooks = books.map((b: any) => {
         return {
           ...b,
-          currentPage: Number(b?.currentPage),
+          currentPage: !isNaN(Number(b?.currentPage))
+            ? Number(b?.currentPage)
+            : 0,
           status: b.title === book.title ? newStatusKey : b.status,
         };
       });
@@ -143,11 +117,37 @@ export default function BookPreviewScreen() {
     }
   };
 
-  const items = [
-    { label: t("read"), value: "read" },
-    { label: t("to_read"), value: "to_read" },
-    { label: t("currently_reading"), value: "currently_reading" },
-  ];
+  const handleRatingChange = async (newRating: number) => {
+    setParsedBook((prevBook) => ({
+      ...prevBook,
+      rating: newRating,
+    }));
+    try {
+      const existingBooks = await AsyncStorage.getItem("books");
+      const books = existingBooks ? JSON.parse(existingBooks) : [];
+      const updatedBooks = books.map((b: any) => {
+        return {
+          ...b,
+          rating: b.title === book.title ? newRating : b.rating,
+        };
+      });
+      await AsyncStorage.setItem("books", JSON.stringify(updatedBooks));
+    } catch (error) {
+      console.error("Error updating book rating", error);
+    }
+  };
+
+  if (!book) {
+    return (
+      <Layout title={t("book_preview")}>
+        <View style={styles.container}>
+          <Text style={styles.errorText}>
+            {t("book_details_not_available")}
+          </Text>
+        </View>
+      </Layout>
+    );
+  }
 
   return (
     <Layout
@@ -164,60 +164,40 @@ export default function BookPreviewScreen() {
       >
         <Image
           source={
-            parsedBook.image
+            parsedBook.image && typeof parsedBook.image === "string"
               ? { uri: getSecureImageUrl(parsedBook.image) }
-              : require("../../assets/images/unknownBook.jpg")
+              : require("../../assets/images/noCover.jpg")
           }
           style={styles.image}
         />
         <Text style={styles.title}>{parsedBook.title}</Text>
         <Text style={styles.author}>{parsedBook.author}</Text>
-        <Text style={styles.date}>
-          {parsedBook.saveDate
-            ? new Date(parsedBook.saveDate).toLocaleDateString()
-            : "-"}
-        </Text>
-        {(bookStatus.toLowerCase() === "read" ||
-          bookStatus.toLowerCase() === "okudum") && (
+        {bookStatus?.toLowerCase() === "read" && (
           <View style={styles.ratingContainer}>
             <StarRating
               rating={parsedBook.rating}
-              onRatingChange={() => {}}
+              onRatingChange={handleRatingChange}
               size={sizes.fontSizeLarge * 1.2}
             />
           </View>
         )}
         <View style={styles.statusContainer}>
-          <DropDownPicker
+          <CustomDropDownPicker
             open={open}
             value={bookStatus}
-            items={items}
             setOpen={setOpen}
             setValue={(callback) => {
-              const newStatusKey = callback(bookStatus);
+              const newStatusKey =
+                typeof callback === "function"
+                  ? callback(bookStatus)
+                  : callback;
               setBookStatus(newStatusKey);
               handleStatusChange(newStatusKey);
             }}
-            setItems={() => {}}
-            style={styles.statusDropdown}
-            dropDownContainerStyle={{
-              backgroundColor: colors.background,
-              borderColor: colors.secondary,
-            }}
-            selectedItemContainerStyle={{
-              backgroundColor: colors.backgroundSecondary,
-            }}
-            placeholder={getStatusLabel(bookStatus)}
           />
         </View>
         <View style={styles.textContainer}>
           <View style={styles.detailsSection}>
-            {parsedBook.pages && (
-              <>
-                <Text style={styles.label}>{t("pages")}</Text>
-                <Text style={styles.value}>{parsedBook.pages}</Text>
-              </>
-            )}
             {parsedBook.publication && (
               <>
                 <Text style={styles.label}>{t("publication")}</Text>
@@ -230,52 +210,21 @@ export default function BookPreviewScreen() {
                 <Text style={styles.value}>{parsedBook.review}</Text>
               </>
             )}
-            {parsedBook.status === "currently_reading" && (
+            {parsedBook.pages && (
               <>
-                <Text style={styles.label}>{t("current_page")}</Text>
-                <Text style={styles.value}>{parsedBook.currentPage}</Text>
+                <Text style={styles.label}>{t("pages")}</Text>
+                <Text style={styles.value}>{parsedBook.pages}</Text>
               </>
             )}
-            {parsedBook.favPageImage && (
-              <>
-                <Text style={styles.label}>
-                  {t("favPage") + " | "}
-                  <Text
-                    style={{
-                      color: colors.textSecondary,
-                      fontSize: sizes.fontSizeSmall,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {parsedBook.favPage ? parsedBook.favPage : "-"}
-                  </Text>
-                </Text>
-                <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-                  <Image
-                    source={{ uri: getSecureImageUrl(parsedBook.favPageImage) }}
-                    style={styles.favPageImage}
-                  />
-                </TouchableOpacity>
-                <Modal
-                  visible={isModalVisible}
-                  transparent={true}
-                  onRequestClose={() => setIsModalVisible(false)}
-                >
-                  <View style={styles.modalContainer}>
-                    <TouchableOpacity
-                      style={styles.modalBackground}
-                      onPress={() => setIsModalVisible(false)}
-                    >
-                      <Image
-                        source={{
-                          uri: getSecureImageUrl(parsedBook.favPageImage),
-                        }}
-                        style={styles.modalImage}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </Modal>
-              </>
+            {parsedBook.status === "currently_reading" && (
+              <CurrentPageSection
+                book={parsedBook}
+                setParsedBook={setParsedBook}
+              />
+            )}
+            {(parsedBook.status === "read" ||
+              parsedBook.status === "currently_reading") && (
+              <FavImageSection book={parsedBook} />
             )}
           </View>
         </View>
@@ -323,27 +272,12 @@ const styles = StyleSheet.create({
     fontSize: sizes.fontSizeSmall,
     fontStyle: "italic",
   },
-  date: {
-    marginBottom: 5,
-    color: colors.textSecondary,
-    fontSize: sizes.fontSizeSmall,
-    fontStyle: "italic",
-  },
   image: {
     width: 150,
     height: 240,
     borderRadius: sizes.borderRadius,
     backgroundColor: colors.background,
     marginBottom: 10,
-  },
-  favPageImage: {
-    width: 200,
-    height: 200,
-    borderRadius: sizes.borderRadius,
-    backgroundColor: colors.background,
-    margin: 10,
-    marginLeft: "20%",
-    marginRight: "20%",
   },
   status: {
     marginBottom: 5,
@@ -397,21 +331,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
+  incrementContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.blur,
-  },
-  modalBackground: {
-    width: "100%",
-    height: "100%",
     justifyContent: "center",
-    alignItems: "center",
+    marginTop: 10,
   },
-  modalImage: {
-    width: "90%",
-    height: "90%",
-    resizeMode: "contain",
+  incrementButton: {
+    padding: 10,
+    backgroundColor: colors.primary,
+    borderRadius: sizes.borderRadius,
+  },
+  incrementButtonText: {
+    color: colors.textPrimary,
+    fontSize: sizes.fontSizeMedium,
+  },
+  incrementInput: {
+    width: 50,
+    height: 40,
+    textAlign: "center",
+    borderColor: colors.secondary,
+    borderWidth: 1,
+    marginHorizontal: 10,
+    borderRadius: sizes.borderRadius,
+    color: colors.textPrimary,
+    fontSize: sizes.fontSizeMedium,
   },
 });

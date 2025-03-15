@@ -1,16 +1,17 @@
-import { View, StyleSheet, Text, FlatList } from "react-native";
-import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Text, FlatList, Animated } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import VersionScreen from "../components/versionScreen";
-import { Book } from "../components/book";
+import { Book } from "../components/Book";
 import { ScrollView } from "react-native-gesture-handler";
-import AddButton from "../components/addButton";
+import { AddButton } from "../components/AddButton";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -35,10 +36,17 @@ export default function ProfileScreen() {
   });
 
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language);
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   const handleLanguageChange = (language: string) => {
-    setSelectedLanguage(language);
-    i18n.changeLanguage(language);
+    Animated.timing(slideAnim, {
+      toValue: language === "en" ? -33 : 32,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedLanguage(language);
+      i18n.changeLanguage(language);
+    });
   };
 
   useEffect(() => {
@@ -112,6 +120,14 @@ export default function ProfileScreen() {
         <View>
           <View style={styles.pickerContainer}>
             <View style={styles.languageSwitcher}>
+              <Animated.View
+                style={[
+                  styles.slider,
+                  {
+                    transform: [{ translateX: slideAnim }],
+                  },
+                ]}
+              />
               <Text
                 style={[
                   styles.languageOption,
@@ -119,7 +135,7 @@ export default function ProfileScreen() {
                 ]}
                 onPress={() => handleLanguageChange("en")}
               >
-                En
+                English
               </Text>
               <Text
                 style={[
@@ -128,13 +144,13 @@ export default function ProfileScreen() {
                 ]}
                 onPress={() => handleLanguageChange("tr")}
               >
-                Tr
+                Türkçe
               </Text>
             </View>
           </View>
           <View style={styles.header}>
             <Text style={styles.hello}>👋 {t("hello")}, </Text>
-            <Text style={styles.brand}>KitApper!</Text>
+            <Text style={styles.brand}>KitLogger!</Text>
           </View>
         </View>
         <View style={styles.totalReadBook}>
@@ -143,28 +159,23 @@ export default function ProfileScreen() {
           </Text>
         </View>
         <View>
-          <Text style={styles.sectionTitleTop}>
-            {t("recently_saved_books")}
-          </Text>
+          <View style={styles.title}>
+            <Ionicons name="book" size={22} color={colors.slider} />
+            <Text style={styles.sectionTitle}>{t("recently_saved_books")}</Text>
+          </View>
           <View style={styles.featuredBooksContainer}>
             {recentBooks.map((book, index) => (
               <View key={index} style={styles.bookContainer}>
-                <Book
-                  title={book.title}
-                  author={book.author}
-                  image={book.image}
-                  pages={book.pages.toString()}
-                  publication={book.publication}
-                  review={book.review || ""}
-                  rating={book.rating}
-                  status={book.status}
-                />
+                <Book book={book} />
               </View>
             ))}
           </View>
         </View>
         <View>
-          <Text style={styles.sectionTitle}>{t("reviews")}</Text>
+          <View style={styles.title}>
+            <Ionicons name="reader" size={22} color={colors.slider} />
+            <Text style={styles.sectionTitle}>{t("reviews")}</Text>
+          </View>
           <FlatList
             nestedScrollEnabled
             data={recentReviews}
@@ -216,12 +227,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: sizes.fontSizeMedium,
-    fontWeight: "bold",
     alignSelf: "flex-start",
+    letterSpacing: 0.3,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    marginLeft: 6,
   },
   sectionTitleTop: {
     fontSize: sizes.fontSizeMedium,
-    fontWeight: "bold",
     alignSelf: "flex-start",
     marginTop: 20,
   },
@@ -239,7 +252,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   reviewBook: {
-    fontWeight: "bold",
     fontSize: sizes.fontSizeSmall,
   },
   reviewText: {
@@ -249,12 +261,12 @@ const styles = StyleSheet.create({
   featuredBooksContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   reviewsList: {
     maxHeight: 200,
-    marginTop: 15,
     marginBottom: 20,
+    marginTop: 10,
   },
 
   totalReadBook: {
@@ -269,28 +281,42 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     alignItems: "flex-end",
-    marginVertical: 1,
-  },
-  languageLabel: {
-    fontSize: sizes.fontSizeSmall,
-    fontWeight: "bold",
-    marginBottom: 10,
+    justifyContent: "center",
   },
   languageSwitcher: {
     flexDirection: "row",
     justifyContent: "center",
+    alignItems: "center",
     backgroundColor: colors.secondary,
-    borderRadius: sizes.borderRadius * 5,
-    padding: 5,
-    width: 80,
+    borderRadius: 1000,
+    width: 130,
+    marginVertical: 10,
+    position: "relative",
+    height: 40,
+  },
+  slider: {
+    position: "absolute",
+    alignSelf: "flex-start",
+    alignContent: "center",
+    width: 70,
+    height: "100%",
+    backgroundColor: colors.primary,
+    borderRadius: 1000,
   },
   languageOption: {
+    borderRadius: 1000,
+    alignContent: "center",
+    textAlign: "center",
+    flex: 1,
     padding: 10,
-    borderRadius: sizes.borderRadius * 5,
     color: colors.black,
   },
   selectedLanguage: {
-    backgroundColor: colors.primary,
     color: colors.white,
+  },
+  title: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
   },
 });

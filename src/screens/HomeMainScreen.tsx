@@ -18,6 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useTranslation } from "react-i18next";
+import { getSecureImageUrl } from "../util/getSecureImageUrl";
 
 type RootStackParamList = {
   BookDetail: {
@@ -59,10 +60,6 @@ export default function HomeMainScreen() {
     { title: t("classic_literature"), query: "subject:classic+literature" },
     { title: t("science_technology"), query: "subject:science+technology" },
     { title: t("personal_development"), query: "subject:self-help" },
-    { title: t("history"), query: "subject:history" },
-    { title: t("biographies"), query: "subject:biography" },
-    { title: t("romance"), query: "subject:romance" },
-    { title: t("fantasy"), query: "subject:fantasy" },
   ];
 
   useEffect(() => {
@@ -149,7 +146,6 @@ export default function HomeMainScreen() {
         review: "",
         rating: 0,
         status: "To Read",
-        saveDate: new Date(),
       };
 
       books.push(newBook);
@@ -164,11 +160,6 @@ export default function HomeMainScreen() {
 
   const navigateToBookDetail = (book: Book) => {
     navigation.navigate("BookDetail", { book } as never);
-  };
-
-  const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
-    return url.replace("http://", "https://").replace("&edge=curl", "");
   };
 
   const renderBookItem = ({ item }: { item: Book }) => (
@@ -215,7 +206,7 @@ export default function HomeMainScreen() {
         Object.entries(recommendedBooks).map(([category, categoryBooks]) => (
           <View key={category} style={styles.categorySection}>
             <View style={styles.categoryTitle}>
-              <Ionicons name="book" size={22} color={colors.primary} />
+              <Ionicons name="book" size={22} color={colors.slider} />
               <Text style={styles.categoryTitleText}>{category}</Text>
             </View>
             <FlatList
@@ -401,7 +392,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: colors.textSecondary,
     marginLeft: 6,
-    textTransform: "uppercase",
   },
   recommendedListContainer: {
     paddingRight: 16,

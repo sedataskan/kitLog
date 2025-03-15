@@ -86,7 +86,7 @@ export const TopHeader = ({
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.background,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 15,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.background,
     width: "100%",
   },
   backButton: {
