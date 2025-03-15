@@ -14,7 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, RouteProp } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
-import DropDownPicker from "react-native-dropdown-picker";
+import { CustomDropDownPicker } from "../components/CustomDropDownPicker";
+import { getSecureImageUrl } from "../util/getSecureImageUrl";
 
 type BookDetailScreenRouteProp = RouteProp<
   {
@@ -50,11 +51,6 @@ export default function BookDetailScreen({
 
   const [open, setOpen] = React.useState(false);
 
-  const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
-    return url.replace("http://", "https://").replace("&edge=curl", "");
-  };
-
   const addToLibrary = async () => {
     try {
       const existingBooks = await AsyncStorage.getItem("books");
@@ -79,7 +75,6 @@ export default function BookDetailScreen({
         review: "",
         rating: 0,
         status: t("to_read"),
-        saveDate: new Date(),
       };
 
       books.push(newBook);
@@ -147,18 +142,11 @@ export default function BookDetailScreen({
             )}
             {book.volumeInfo.status && (
               <View style={styles.statusContainer}>
-                <DropDownPicker
+                <CustomDropDownPicker
                   open={open}
                   value={book.volumeInfo.status}
-                  items={[]}
                   setOpen={setOpen}
                   setValue={() => {}}
-                  multiple={false}
-                  style={styles.status}
-                  containerStyle={{ width: "100%" }}
-                  dropDownContainerStyle={{
-                    backgroundColor: colors.background,
-                  }}
                 />
               </View>
             )}
@@ -249,16 +237,6 @@ const styles = StyleSheet.create({
   pages: {
     fontSize: sizes.fontSizeSmall,
     color: colors.textSecondary,
-  },
-  status: {
-    marginBottom: 5,
-    borderRadius: sizes.borderRadius,
-    textAlign: "center",
-    fontSize: sizes.fontSizeSmall,
-    color: colors.textPrimary,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
   },
   statusContainer: {
     marginBottom: 20,

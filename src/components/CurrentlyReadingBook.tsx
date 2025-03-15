@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useTranslation } from "react-i18next";
 import { ProgressBar } from "react-native-paper";
+import { getSecureImageUrl } from "../util/getSecureImageUrl";
 
 type RootStackParamList = {
   BookPreview: {
@@ -18,7 +19,6 @@ type RootStackParamList = {
       publication: string;
       review: string;
       rating: number;
-      saveDate: Date;
       status: string;
       favPage?: number;
       favPageImage?: string;
@@ -33,36 +33,23 @@ type BookScreenNavigationProp = StackNavigationProp<
 >;
 
 type CurrentlyReadingBookProps = {
-  title: string;
-  author: string;
-  image: string;
-  pages: string;
-  publication: string;
-  review: string;
-  rating: number;
-  status: string;
-  favPage?: number;
-  favPageImage?: string;
-  currentPage?: number;
-};
-
-const getSecureImageUrl = (url: string | undefined) => {
-  if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
-  return url.replace("http://", "https://").replace("&edge=curl", "");
+  book: any;
 };
 
 export const CurrentlyReadingBook = ({
-  title,
-  author,
-  image,
-  pages,
-  publication,
-  review,
-  rating,
-  status,
-  favPage,
-  favPageImage,
-  currentPage,
+  book: {
+    title,
+    author,
+    image,
+    pages,
+    publication,
+    review,
+    rating,
+    status,
+    favPage,
+    favPageImage,
+    currentPage,
+  },
 }: CurrentlyReadingBookProps) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
   const { t } = useTranslation();
@@ -76,7 +63,6 @@ export const CurrentlyReadingBook = ({
         publication,
         review,
         rating,
-        saveDate: new Date(),
         status,
         favPage,
         favPageImage,
@@ -107,11 +93,17 @@ export const CurrentlyReadingBook = ({
             <View style={styles.iconContainer}>
               <Ionicons name="book-outline" size={16} color={colors.white} />
               <Text style={styles.pagesText}>
-                {t("current_page")}: {currentPage}
+                {t("current_page")}: {currentPage?.toString() || "0"}
               </Text>
             </View>
             <ProgressBar
-              progress={currentPage ? currentPage / parseInt(pages) : 0}
+              progress={
+                !isNaN(
+                  parseInt(currentPage?.toString() || "0") / parseInt(pages)
+                )
+                  ? parseInt(currentPage?.toString() || "0") / parseInt(pages)
+                  : 0
+              }
               color={colors.sliderSecondary}
               style={styles.progressBar}
             />

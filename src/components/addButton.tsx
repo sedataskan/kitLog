@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 
-export default function AddButton({ onPress }: { onPress: () => void }) {
+export const AddButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
   return (
     <TouchableOpacity style={styles.floatingButton} onPress={onPress}>
       <Ionicons
@@ -14,7 +14,7 @@ export default function AddButton({ onPress }: { onPress: () => void }) {
       />
     </TouchableOpacity>
   );
-}
+};
 
 const styles = StyleSheet.create({
   floatingButton: {

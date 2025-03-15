@@ -6,8 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Platform,
-  Button,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../constants/colors";
@@ -20,8 +18,8 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { StarRating } from "./StarRating";
-import { Picker } from "@react-native-picker/picker";
 import { useTranslation } from "react-i18next";
+import { CustomDropDownPicker } from "./CustomDropDownPicker";
 
 interface FilterModalProps {
   visible: boolean;
@@ -38,7 +36,7 @@ interface FilterModalProps {
   };
 }
 
-const FilterModal = ({
+export const FilterModal = ({
   visible,
   onClose,
   onApplyFilters,
@@ -51,7 +49,8 @@ const FilterModal = ({
   const [isClosing, setIsClosing] = useState(false);
   const translateY = useSharedValue(1000);
   const backgroundOpacity = useSharedValue(0);
-  const [isPickerVisible, setPickerVisible] = useState(false);
+  const [bookStatus, setBookStatus] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -71,6 +70,10 @@ const FilterModal = ({
       setName(filters.name);
     }
   }, [visible]);
+
+  useEffect(() => {
+    setStatus(bookStatus);
+  }, [bookStatus]);
 
   const closeModal = () => {
     setIsClosing(true);
@@ -182,19 +185,13 @@ const FilterModal = ({
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>{t("status")}</Text>
-                <TouchableOpacity
-                  style={styles.input}
-                  onPress={() => setPickerVisible(true)}
-                >
-                  <Text
-                    style={[
-                      styles.dropdownText,
-                      !status && styles.placeholderText,
-                    ]}
-                  >
-                    {status || t("selectStatus")}
-                  </Text>
-                </TouchableOpacity>
+                <CustomDropDownPicker
+                  open={open}
+                  value={bookStatus}
+                  setOpen={setOpen}
+                  setValue={setBookStatus}
+                  onChangeValue={(value) => setStatus(value)}
+                />
               </View>
 
               <View
@@ -240,36 +237,6 @@ const FilterModal = ({
           </Animated.View>
         </PanGestureHandler>
       </Animated.View>
-
-      <Modal
-        visible={isPickerVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setPickerVisible(false)}
-      >
-        <View style={styles.bottomPickerContainer}>
-          <View style={styles.pickerHeader}>
-            <Button title={t("done")} onPress={() => setPickerVisible(false)} />
-          </View>
-          <Picker
-            selectedValue={status}
-            onValueChange={(itemValue) => {
-              setStatus(itemValue);
-              if (Platform.OS === "android") {
-                setPickerVisible(false);
-              }
-            }}
-            style={styles.picker}
-          >
-            <Picker.Item label={t("to_read")} value={t("to_read")} />
-            <Picker.Item label={t("read")} value={t("read")} />
-            <Picker.Item
-              label={t("currently_reading")}
-              value={t("currently_reading")}
-            />
-          </Picker>
-        </View>
-      </Modal>
     </Modal>
   );
 };
@@ -415,6 +382,18 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: colors.background,
   },
+  statusContainer: {
+    marginBottom: 20,
+    marginTop: 10,
+    width: "50%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statusDropdown: {
+    width: "100%",
+    backgroundColor: colors.background,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+  },
 });
-
-export default FilterModal;

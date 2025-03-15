@@ -6,19 +6,19 @@ import {
   Text,
 } from "react-native";
 import { Layout } from "../layout/layout";
-import { Book } from "../components/book";
 import { CurrentlyReadingBook } from "../components/CurrentlyReadingBook";
 import { useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import AddButton from "../components/addButton";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { useCallback } from "react";
-import FilterModal from "../components/filterModal";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Book } from "../components/Book";
+import { AddButton } from "../components/AddButton";
+import { FilterModal } from "../components/FilterModal";
 
 export default function LibraryScreen() {
   const navigation = useNavigation();
@@ -27,7 +27,7 @@ export default function LibraryScreen() {
     {
       title: string;
       author: string;
-      image: string;
+      image: string | undefined;
       pages: string;
       publication: string;
       review?: string;
@@ -84,7 +84,7 @@ export default function LibraryScreen() {
         book.author.toLowerCase().includes(filters.name.toLowerCase())) &&
       (!filters.status ||
         book.status.toLowerCase() === filters.status.toLowerCase()) &&
-      (!filters.rating || book.rating === filters.rating)
+      (!filters.rating || book.rating >= filters.rating)
     );
   });
 
@@ -111,7 +111,7 @@ export default function LibraryScreen() {
   const isFilterActive =
     filters.status !== "" || filters.rating !== 0 || filters.name !== "";
   const currentlyReadingBooks = books.filter(
-    (book) => book.status.toLowerCase() === "currently_reading"
+    (book) => book.status?.toLowerCase() === "currently_reading"
   );
 
   return (
@@ -157,20 +157,7 @@ export default function LibraryScreen() {
               contentContainerStyle={styles.currentlyReadingList}
             >
               {currentlyReadingBooks.map((book, index) => (
-                <CurrentlyReadingBook
-                  key={index}
-                  title={book.title}
-                  author={book.author}
-                  image={book.image}
-                  pages={book.pages}
-                  publication={book.publication}
-                  review={book.review || ""}
-                  rating={book.rating}
-                  status={book.status}
-                  favPage={book.favPage}
-                  favPageImage={book.favPageImage}
-                  currentPage={book.currentPage}
-                />
+                <CurrentlyReadingBook key={index} book={book} />
               ))}
             </ScrollView>
           </View>
@@ -178,13 +165,13 @@ export default function LibraryScreen() {
         <View style={styles.bookshelfSection}>
           <View style={styles.bookshelfTitleContainer}>
             <Ionicons name="library" size={20} color={colors.slider} />
-            <Text style={styles.bookshelfTitleText}>{t("bookshelf")}</Text>
+            <Text style={styles.bookshelfTitleText}>{t("bookshelf")} | </Text>
             <Text style={styles.bookCount}>
               {
                 filteredBooks.filter((book) =>
                   isFilterActive
                     ? true
-                    : book.status.toLowerCase() !== t("reading").toLowerCase()
+                    : book.status?.toLowerCase() !== t("reading").toLowerCase()
                 ).length
               }{" "}
               {t("books")}
@@ -195,23 +182,10 @@ export default function LibraryScreen() {
               .filter((book) =>
                 isFilterActive
                   ? true
-                  : book.status.toLowerCase() !== t("reading").toLowerCase()
+                  : book.status?.toLowerCase() !== t("reading").toLowerCase()
               )
               .map((book, index) => (
-                <Book
-                  key={index}
-                  title={book.title}
-                  author={book.author}
-                  image={book.image || ""}
-                  pages={book.pages}
-                  publication={book.publication}
-                  review={book.review || ""}
-                  rating={book.rating}
-                  status={book.status}
-                  favPage={book.favPage}
-                  favPageImage={book.favPageImage}
-                  currentPage={book.currentPage}
-                />
+                <Book key={index} book={book} />
               ))}
           </View>
         </View>
@@ -263,7 +237,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: colors.textSecondary,
     marginLeft: 6,
-    textTransform: "uppercase",
   },
   currentlyReadingList: {
     paddingHorizontal: 0,
@@ -288,7 +261,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: colors.textSecondary,
     marginLeft: 6,
-    textTransform: "uppercase",
   },
   bookCount: {
     fontSize: sizes.fontSizeSmall,

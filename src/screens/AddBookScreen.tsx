@@ -7,20 +7,20 @@ import {
   Button,
   Image,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { Layout } from "../layout/layout";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { RouteProp } from "@react-navigation/native";
-import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
-import { ScrollView } from "react-native-gesture-handler";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { StarRating } from "../components/StarRating";
 import { useTranslation } from "react-i18next";
-import DropDownPicker from "react-native-dropdown-picker";
+import { CustomDropDownPicker } from "../components/CustomDropDownPicker";
+import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
 
 type AddBookScreenRouteProp = RouteProp<
   {
@@ -44,8 +44,6 @@ export default function AddBookScreen({
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(2.5);
   const [image, setImage] = useState("");
-  const [favPageImage, setFavPageImage] = useState("");
-  const [favPage, setFavPage] = useState(0);
   const [error, setError] = useState("");
   const [errorFields, setErrorFields] = useState<string[]>([]);
   const [status, setStatus] = useState("");
@@ -63,8 +61,6 @@ export default function AddBookScreen({
       setRating(book.rating);
       setImage(book.image);
       setStatus(book.status);
-      setFavPageImage(book.favPageImage);
-      setFavPage(book.favPage);
       setCurrentPage(book.currentPage);
     }
   }, [isEdit, book]);
@@ -88,9 +84,6 @@ export default function AddBookScreen({
       review,
       rating: rating || 2.5,
       image,
-      favPageImage,
-      favPage,
-      saveDate: new Date(),
       status,
       currentPage: currentPage ?? 0,
     };
@@ -125,8 +118,6 @@ export default function AddBookScreen({
       setRating(2.5);
       setImage("");
       setStatus("");
-      setFavPageImage("");
-      setFavPage(0);
       setCurrentPage(0);
       onBookAdded(newBook);
       navigation.navigate("BookPreview" as never, {
@@ -163,43 +154,6 @@ export default function AddBookScreen({
     }
   };
 
-  const pickFavPageImage = async () => {
-    try {
-      const permissionResult =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (permissionResult.status !== "granted") {
-        alert(t("permission_required"));
-        return;
-      }
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [2, 3],
-        quality: 0.5,
-      });
-      if (!result.canceled) {
-        const selectedAsset = result.assets[0];
-        if (selectedAsset?.uri) {
-          setFavPageImage(selectedAsset.uri);
-        }
-      }
-    } catch (error) {
-      console.error("Error picking image:", error);
-      alert(t("error_picking_image"));
-    }
-  };
-
-  const getStatusLabel = (statusKey: string) => {
-    switch (statusKey) {
-      case "read":
-        return t("read");
-      case "to_read":
-        return t("to_read");
-      case "currently_reading":
-        return t("currently_reading");
-    }
-  };
-
   const handleStatusChange = async (newStatusKey: string) => {
     setStatus(newStatusKey);
     if (book) {
@@ -215,12 +169,6 @@ export default function AddBookScreen({
       }
     }
   };
-
-  const items = [
-    { label: t("read"), value: "read" },
-    { label: t("to_read"), value: "to_read" },
-    { label: t("currently_reading"), value: "currently_reading" },
-  ];
 
   return (
     <Layout title={isEdit ? t("edit_book") : t("add_book")} canGoBack={true}>
@@ -267,26 +215,14 @@ export default function AddBookScreen({
                 <Text style={styles.label}>
                   {t("status")} <Text style={styles.mandatory}>*</Text>
                 </Text>
-                <DropDownPicker
+                <CustomDropDownPicker
                   open={open}
                   value={status}
-                  items={items}
                   setOpen={setOpen}
-                  setValue={(callback) => {
-                    const newStatusKey = callback(status);
+                  setValue={(newStatusKey) => {
                     setStatus(newStatusKey);
-                    handleStatusChange(newStatusKey);
+                    handleStatusChange(newStatusKey as string);
                   }}
-                  setItems={() => {}}
-                  style={styles.statusDropdown}
-                  dropDownContainerStyle={{
-                    backgroundColor: colors.background,
-                    borderColor: colors.secondary,
-                  }}
-                  selectedItemContainerStyle={{
-                    backgroundColor: colors.backgroundSecondary,
-                  }}
-                  placeholder={getStatusLabel(status)}
                 />
               </View>
               {status === "read" && (
@@ -305,7 +241,7 @@ export default function AddBookScreen({
                     style={styles.input}
                     value={currentPage.toString()}
                     onChangeText={(text) => {
-                      setCurrentPage(text);
+                      setCurrentPage(Number(text));
                     }}
                     keyboardType="numeric"
                   />
@@ -375,37 +311,6 @@ export default function AddBookScreen({
                   onChangeText={setPublication}
                 />
               </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>{t("favPageNumber")}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={favPage.toString()}
-                  onChangeText={(text) => setFavPage(Number(text))}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <TouchableOpacity
-                onPress={pickFavPageImage}
-                style={styles.favPageImage}
-                activeOpacity={0.7}
-              >
-                <Image
-                  source={
-                    favPageImage
-                      ? { uri: favPageImage }
-                      : require("../../assets/images/noCover.jpg")
-                  }
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-                <View style={styles.imageOverlay}>
-                  <Text style={styles.imageOverlayText}>
-                    {t("tap_to_change_fav_page_image")}
-                  </Text>
-                </View>
-              </TouchableOpacity>
             </>
           )}
 
@@ -482,13 +387,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: sizes.fontSizeSmall,
   },
-  statusDropdown: {
-    width: "100%",
-    backgroundColor: colors.background,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: colors.secondary,
-  },
   backButton: {
     fontSize: sizes.fontSizeLarge,
     fontWeight: "bold",
@@ -507,7 +405,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: colors.blur,
     padding: 5,
     alignItems: "center",
   },
@@ -537,14 +435,5 @@ const styles = StyleSheet.create({
   reviewInput: {
     height: 100,
     textAlignVertical: "top",
-  },
-  favPageImage: {
-    width: 200,
-    height: 200,
-    borderRadius: sizes.borderRadius,
-    backgroundColor: colors.background,
-    margin: 10,
-    marginLeft: "20%",
-    marginRight: "20%",
   },
 });

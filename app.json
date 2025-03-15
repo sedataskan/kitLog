@@ -26,12 +26,12 @@
     "splash": {
       "image": "./assets/images/kitlog.png",
       "resizeMode": "contain",
-      "backgroundColor": "#CAAFC833"
+      "backgroundColor": "#b7caaf"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/kitlog.png",
-        "backgroundColor": "#CAAFC833"
+        "backgroundColor": "#b7caaf"
       }
     },
     "web": {

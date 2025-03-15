@@ -5,7 +5,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { colors } from "../constants/colors";
 import { sizes } from "../constants/sizes";
 import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next";
+import { getSecureImageUrl } from "../util/getSecureImageUrl";
 
 type RootStackParamList = {
   BookPreview: {
@@ -17,7 +17,6 @@ type RootStackParamList = {
       publication: string;
       review: string;
       rating: number;
-      saveDate: Date;
       status: string;
       favPage?: number;
       favPageImage?: string;
@@ -30,6 +29,10 @@ type BookScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "BookPreview"
 >;
+
+type BookProps = {
+  book: any;
+};
 
 const getStatusIcon = (status: string) => {
   switch (status) {
@@ -45,41 +48,22 @@ const getStatusIcon = (status: string) => {
 };
 
 export const Book = ({
-  title,
-  author,
-  image,
-  pages,
-  publication,
-  review,
-  rating,
-  status,
-  favPage,
-  favPageImage,
-  currentPage,
-  style,
-}: {
-  title: string;
-  author: string;
-  image: string;
-  pages: string;
-  publication: string;
-  review: string;
-  rating: number;
-  status: string;
-  favPage?: number;
-  favPageImage?: string;
-  currentPage?: number;
-  style?: object;
-}) => {
+  book: {
+    title,
+    author,
+    image,
+    pages,
+    publication,
+    review,
+    rating,
+    status,
+    favPage,
+    favPageImage,
+    currentPage,
+  },
+}: BookProps) => {
   const navigation = useNavigation<BookScreenNavigationProp>();
-  const { t } = useTranslation();
-  const statusIcon = getStatusIcon(status, t);
-
-  const getSecureImageUrl = (url: string | undefined) => {
-    if (!url) return "https://via.placeholder.com/128x192?text=No+Cover";
-    return url.replace("http://", "https://").replace("&edge=curl", "");
-  };
-
+  const statusIcon = getStatusIcon(status);
   const handlePress = () => {
     navigation.navigate("BookPreview", {
       book: {
@@ -92,7 +76,6 @@ export const Book = ({
         publication,
         review,
         rating,
-        saveDate: new Date(),
         status,
         favPage,
         favPageImage,
@@ -102,7 +85,7 @@ export const Book = ({
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} style={[styles.container, style]}>
+    <TouchableOpacity onPress={handlePress} style={[styles.container]}>
       <View style={styles.imageContainer}>
         <View style={styles.statusBadge}>
           <Ionicons name={statusIcon} size={12} color={colors.primary} />

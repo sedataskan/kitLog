@@ -15,7 +15,7 @@
   "rating": "Rating",
   "review": "Review",
   "author": "Author",
-  "pages": "Pages",
+  "pages": "Total Pages",
   "publisher": "Publisher",
   "published": "Published",
   "description": "Description",
@@ -83,5 +83,6 @@
   "tap_to_change_fav_page_image": "Tap to change favorite page image",
   "favPage": "Favorite Page",
   "favPageNumber": "Favorite Page Number",
-  "current_page": "Current Page"
+  "current_page": "Current Page",
+  "add_fav_page_image": "Add Favorite Page's Photograph"
 }

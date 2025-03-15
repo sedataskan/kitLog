@@ -15,7 +15,7 @@
   "rating": "Puan",
   "review": "Yorum",
   "author": "Yazar",
-  "pages": "Sayfa",
+  "pages": "Toplam Sayfa",
   "publisher": "Yayınevi",
   "published": "Yayınlanma Tarihi",
   "description": "Açıklama",
@@ -84,5 +84,6 @@
   "tap_to_change_fav_page_image": "Favori sayfa resmini değiştirmek için dokunun",
   "favPage": "Favori Sayfa",
   "favPageNumber": "Favori Sayfa Numarası",
-  "current_page": "Şu Anki Sayfa"
+  "current_page": "Şu Anki Sayfa",
+  "add_fav_page_image": "Favori Sayfa Resmi Ekle"
 }

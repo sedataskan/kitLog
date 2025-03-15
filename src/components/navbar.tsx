@@ -11,7 +11,7 @@ import { sizes } from "../constants/sizes";
 
 const Tab = createBottomTabNavigator();
 
-export default function Navbar() {
+export function Navbar() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => {
