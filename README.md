@@ -1,11 +1,11 @@
 [![preview](https://github.com/sedataskan/kitApp/actions/workflows/preview.yml/badge.svg)](https://github.com/sedataskan/kitApp/actions/workflows/preview.yml)
- # kitApp 
+ # KitLog 
 
  <p align="center">
   <img src="assets/images/banner.png" >
 </p>
 <p align="center">
-    kitApp is a mobile application that allows users to manage their own library.
+    KitLog is a mobile application that allows users to manage their own library.
 </p>
 
 ## Design
