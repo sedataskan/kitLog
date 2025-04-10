@@ -19,7 +19,7 @@
 ## Demo
 
 <p align="center">
-<img src=".assets/demo.gif" />
+ <img src=".assets/images/demo.gif" />
 </p>
 
 ## Technologies
