@@ -19,7 +19,7 @@
 ## Demo
 
 <p align="center">
- <img src="assets/images/demo.gif" />
+ <img src="assets/images/demo.gif" height=500px />
 </p>
 
 ## Technologies
@@ -33,7 +33,7 @@
 ## Installation
 
 ```bash
- git clone https://github.com/sedataskan/kitApp.git
+ git clone https://github.com/sedataskan/kitLog.git
 ```
 
 ## Usage
